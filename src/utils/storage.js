@@ -5,7 +5,7 @@
  * @LastEditTime : 2021-02-27 15:26:14
  * @FilePath     : /src/utils/storage.js
  */
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import AsyncStorage from '@react-native-community/async-storage'
 const { getItem, setItem, removeItem } = AsyncStorage
 /**
 * 默认没有过期时间，可以设置过期时间，时间单位为小时
