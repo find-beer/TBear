@@ -33,6 +33,7 @@
     "react-devtools": "^4.8.2",
     "react-native": "0.63.2",
     "react-native-amap-geolocation": "^1.1.2",
+    "react-native-camera": "^3.43.1",
     "react-native-datepicker": "^1.7.2",
     "react-native-device-info": "^8.0.1",
     "react-native-flexi-radio-button": "^0.2.2",
