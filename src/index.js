@@ -31,6 +31,7 @@ import Register from "./pages/account/register";
 
 import Hobby from "./pages/account/hobby";
 import QrCode from "./pages/mine/qrCode";
+import ScanQRCode from "./pages/mine/scanQRCode"
 import Store from "./pages/mine/store";
 import StoreList from "./pages/mine/storeList";
 import EditInfo from "./pages/mine/editInfo";
@@ -76,6 +77,7 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '爱好' }}    name='Hobby'              component={Hobby}/>
       <Stack.Screen options={{ ...defautOptions, title: '仓库' }}    name='Store'              component={Store}/>
       <Stack.Screen options={{ ...defautOptions, title: '我的二维码' }}  name='QrCode'             component={QrCode}/>
+      <Stack.Screen options={{ ...defautOptions, title: '扫一扫' }}  name='ScanQRCode'             component={ScanQRCode}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='Splash'             component={Splash}/>
       <Stack.Screen options={{ ...defautOptions, title: '票' }}      name='Tickets'            component={Tickets}/>
       <Stack.Screen options={{ ...defautOptions, title: '设置' }}    name='Setting'            component={Setting}/>

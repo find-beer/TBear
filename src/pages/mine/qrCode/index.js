@@ -79,7 +79,11 @@ export default class QrCode extends Component {
   handleDownload() {
     this.saveQrcode()
   }
-
+  // 扫一扫
+  handleScanQRCode() {
+    console.log('扫一扫')
+    this.props.navigation.navigate('ScanQRCode')
+  }
   componentDidMount() {}
   render() {
     return (
@@ -87,18 +91,23 @@ export default class QrCode extends Component {
         <SafeAreaView style={{ flex: 0, backgroundColor: 'white' }} />
         <SafeAreaView style={styles.pages}>
           <View style={styles.container}>
-            <View style={styles.qrItemBox}>
-              <View style={styles.qrItem}>
-                <Image source={imgUrl.scanIcon} style={styles.scanIcon}></Image>
-                <Text style={styles.scanText}>扫一扫</Text>
+            <TouchableOpacity onPress={() => this.handleScanQRCode()}>
+              <View style={styles.qrItemBox}>
+                <View style={styles.qrItem}>
+                  <Image
+                    source={imgUrl.scanIcon}
+                    style={styles.scanIcon}
+                  ></Image>
+                  <Text style={styles.scanText}>扫一扫</Text>
+                </View>
+                <View style={styles.qrItem}>
+                  <Image
+                    source={imgUrl.arrowIcon}
+                    style={styles.arrowIcon}
+                  ></Image>
+                </View>
               </View>
-              <View style={styles.qrItem}>
-                <Image
-                  source={imgUrl.arrowIcon}
-                  style={styles.arrowIcon}
-                ></Image>
-              </View>
-            </View>
+            </TouchableOpacity>
             <View style={styles.qrCodeWrapper}>
               <ImageBackground source={imgUrl.qrCodeBg} style={styles.qrBg}>
                 <Image source={imgUrl.avatar} style={styles.avatar}></Image>
