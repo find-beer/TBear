@@ -14,6 +14,8 @@ target 'TBear' do
 
   pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
+  pod 'RNReactNativeLocalBarcodeRecognizer', :path => '../node_modules/react-native-local-barcode-recognizer'
+
   target 'TBearTests' do
     inherit! :complete
     # Pods for testing

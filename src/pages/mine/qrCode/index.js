@@ -14,9 +14,9 @@ import Header from '../../../components/header'
 import { scaleSize, scaleFont } from '../../../utils/scaleUtil'
 // import QRCode from "react-native-qrcode-generator";
 import QRCode from 'react-native-qrcode-svg'
-// import ViewShot from "react-native-view-shot";
 import CameraRoll from '@react-native-community/cameraroll'
 import RNFS from 'react-native-fs'
+import { connect, bindActions, bindState } from './../../../redux'
 
 const imgUrl = {
   scanIcon: require('../../../assets/mine/QR-icon.png'),
@@ -26,7 +26,7 @@ const imgUrl = {
   downloadIcon: require('../../../assets/mine/download-icon.png'),
   shareIcon: require('../../../assets/mine/share-icon.png'),
 }
-export default class QrCode extends Component {
+class QrCode extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -86,6 +86,7 @@ export default class QrCode extends Component {
   }
   componentDidMount() {}
   render() {
+    const { userInfo } = this.props
     return (
       <Fragment>
         <SafeAreaView style={{ flex: 0, backgroundColor: 'white' }} />
@@ -110,16 +111,17 @@ export default class QrCode extends Component {
             </TouchableOpacity>
             <View style={styles.qrCodeWrapper}>
               <ImageBackground source={imgUrl.qrCodeBg} style={styles.qrBg}>
-                <Image source={imgUrl.avatar} style={styles.avatar}></Image>
-                <Text style={styles.userName}>钱罗罗</Text>
+                {/* <Image source={imgUrl.avatar} style={styles.avatar}></Image> */}
+                <Image source={{ uri: userInfo.headPicUrl?.replace("https", "http") }} style={styles.avatar}></Image>
+                <Text style={styles.userName}>{userInfo.name}</Text>
                 <View style={styles.codeContainer}>
                   {/* <QRCode
-                                        value={'123123123123123'}
-                                        size={scaleSize(520)}
-                                        bgColor='black'
-                                        fgColor='white'/> */}
-                  <QRCode
                     value={'123123123123123'}
+                    size={scaleSize(520)}
+                    bgColor='black'
+                    fgColor='white'/> */}
+                  <QRCode
+                    value={''+ userInfo.uid}
                     size={scaleSize(520)}
                     color="black"
                     backgroundColor="white"
@@ -152,7 +154,7 @@ export default class QrCode extends Component {
     )
   }
 }
-
+export default connect(bindState, bindActions)(QrCode)
 const styles = StyleSheet.create({
   pages: {
     paddingBottom: scaleSize(200),

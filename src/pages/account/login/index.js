@@ -1,5 +1,5 @@
 /*
- * @Descripttion : 
+ * @Descripttion :
  * @Autor        : 刘振利
  * @Date         : 2021-01-23 13:39:21
  * @LastEditTime : 2021-02-28 13:27:07
@@ -16,27 +16,28 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
 } from 'react-native'
-import { scaleFont } from '../../../utils/scaleUtil';
+import { scaleFont } from '../../../utils/scaleUtil'
 import { setStorage } from './../../../utils/storage'
-import * as Toast from './../../../utils/toast';
-import { bindActions, bindState, connect } from './../../../redux';
+import * as Toast from './../../../utils/toast'
+import AsyncStorage from '@react-native-community/async-storage'
+import { bindActions, bindState, connect } from './../../../redux'
 
-class Login extends Component{
+class Login extends Component {
   constructor(props) {
     super(props)
     this.state = {
       time: 60,
       buttonDisabled: false,
       phoneNumber: '',
-      verifyCode: ''
+      verifyCode: '',
     }
     this.intervalId = null
   }
 
   /**
    * 设置表单数据
-   * @param {String} key 
-   * @param {String} value 
+   * @param {String} key
+   * @param {String} value
    */
   setFormData = (key, value) => {
     const options = {}
@@ -73,7 +74,7 @@ class Login extends Component{
     const { phoneNumber, verifyCode } = this.state
     return {
       phoneNumberVaild: /^1[3456789]\d{9}$/.test(phoneNumber),
-      verifyCodeVaild: /^[0-9]\d{5}$/.test(verifyCode)
+      verifyCodeVaild: /^[0-9]\d{5}$/.test(verifyCode),
     }
   }
 
@@ -87,15 +88,22 @@ class Login extends Component{
       if (!phoneNumberVaild) {
         return Toast.toast('请输入正确手机号')
       }
-      const { success, data, msg } = await this.props.get(`/user/getVerifyCode/${phoneNumber}`)
-      console.log('getVerifyCode success: %s; code: %s;msg: %s', success, data, msg)
+      const { success, data, msg } = await this.props.get(
+        `/user/getVerifyCode/${phoneNumber}`
+      )
+      console.log(
+        'getVerifyCode success: %s; code: %s;msg: %s',
+        success,
+        data,
+        msg
+      )
       if (success) {
         Toast.toast('获取验证码成功')
         this.getDownTime()
       } else {
         Toast.toast(msg)
       }
-    } catch(error) {
+    } catch (error) {
       Toast.toast('获取验证码失败，请重试')
     }
   }
@@ -115,12 +123,16 @@ class Login extends Component{
       this.props.setModalLoading(true, '登录中')
       const { phoneNumber, verifyCode } = this.state
       const payload = { phoneNumber, verifyCode }
-      const { success, data, msg, code } = await this.props.get('/user/login', payload)
+      const { success, data, msg, code } = await this.props.get(
+        '/user/login',
+        payload
+      )
       this.props.setModalLoading(false)
       if (success) {
-          setStorage('userInfo', data)
-          this.props.setUserInfo(data)
-          this.props.navigation.goBack()
+        setStorage('userInfo', data)
+        this.props.setUserInfo(data)
+        AsyncStorage.setItem('session', data.token)
+        this.props.navigation.goBack()
       } else {
         if (code === 10001) {
           this.props.navigation.navigate('Register', {
@@ -130,10 +142,10 @@ class Login extends Component{
           Toast.toast(msg)
         }
       }
-    } catch(error) {
+    } catch (error) {
       console.log('error ----> ', error)
       Toast.toast('登录失败，请重试')
-    } finally{
+    } finally {
       this.props.setModalLoading(false)
     }
   }
@@ -144,17 +156,29 @@ class Login extends Component{
   renderVerifyCodeButton = () => {
     const { buttonDisabled, time } = this.state
     return (
-      <TouchableOpacity activeOpacity={0.7} style={styles.signButton} disabled={buttonDisabled} onPress={this.getVerifyCode}>
-        <Text style={[styles.buttonText, buttonDisabled ? styles.buttonDisable : null ]}>{buttonDisabled ? `${time}s后获取` : '获取验证码'}</Text>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={styles.signButton}
+        disabled={buttonDisabled}
+        onPress={this.getVerifyCode}
+      >
+        <Text
+          style={[
+            styles.buttonText,
+            buttonDisabled ? styles.buttonDisable : null,
+          ]}
+        >
+          {buttonDisabled ? `${time}s后获取` : '获取验证码'}
+        </Text>
       </TouchableOpacity>
     )
   }
-  
+
   /**
    * 组件卸载时清除计时器
    */
   componentWillUnmount() {
-    clearInterval(this.intervalId);
+    clearInterval(this.intervalId)
     this.intervalId = null
   }
 
@@ -164,40 +188,54 @@ class Login extends Component{
 
   render() {
     return (
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "height"} style={styles.loginContainer} >
-        <TouchableOpacity activeOpacity={1} style={styles.loginContainer} onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+        style={styles.loginContainer}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.loginContainer}
+          onPress={Keyboard.dismiss}
+        >
           <View style={styles.titleContainer}>
             <Text style={styles.title}>登录后更精彩</Text>
           </View>
           <View style={styles.infoContainer}>
             <View style={styles.formItem}>
               <TextInput
-                clearButtonMode='while-editing'
+                clearButtonMode="while-editing"
                 style={styles.input}
-                keyboardType='number-pad'
-                placeholder='输入手机号'
+                keyboardType="number-pad"
+                placeholder="输入手机号"
                 maxLength={11}
-                onChangeText={v => this.setFormData('phoneNumber', v)}
+                onChangeText={(v) => this.setFormData('phoneNumber', v)}
               />
             </View>
             <View style={styles.formItem}>
               <TextInput
-                clearButtonMode='while-editing'
+                clearButtonMode="while-editing"
                 style={styles.input}
-                keyboardType='number-pad'
-                placeholder='输入验证码'
+                keyboardType="number-pad"
+                placeholder="输入验证码"
                 maxLength={6}
-                onChangeText={v => this.setFormData('verifyCode', v)}
+                onChangeText={(v) => this.setFormData('verifyCode', v)}
               />
-              { this.renderVerifyCodeButton() }
+              {this.renderVerifyCodeButton()}
             </View>
           </View>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity activeOpacity={0.8} style={styles.loginButton} onPress={this.toLogin}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.loginButton}
+              onPress={this.toLogin}
+            >
               <Text style={styles.loginButtonText}>登录</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.toHomeContainer} onPress={this.toHome}>
+          <TouchableOpacity
+            style={styles.toHomeContainer}
+            onPress={this.toHome}
+          >
             <Text style={styles.toHomeText}>{`先逛逛>>`}</Text>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -209,7 +247,7 @@ class Login extends Component{
 const styles = StyleSheet.create({
   loginContainer: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   },
   titleContainer: {
     height: 50,
@@ -227,7 +265,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     alignItems: 'center',
-    
   },
   formItem: {
     height: 40,
@@ -235,7 +272,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F2F2F2',
     marginBottom: 40,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   input: {
     flex: 1,
@@ -245,14 +282,14 @@ const styles = StyleSheet.create({
     height: 40,
     width: 80,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   buttonText: {
     fontSize: scaleFont(36),
-    color: '#564F5F'
+    color: '#564F5F',
   },
   buttonDisable: {
-    color: '#888889'
+    color: '#888889',
   },
   loginButton: {
     height: 40,
@@ -277,7 +314,7 @@ const styles = StyleSheet.create({
     height: 30,
     lineHeight: 30,
     fontSize: scaleFont(32),
-    color: '#888889'
-  }
+    color: '#888889',
+  },
 })
 export default connect(bindState, bindActions)(Login)
