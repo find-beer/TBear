@@ -83,7 +83,7 @@ class Publish extends Component{
       if (type === 'active') {
         this.state.navigation.navigate('PublishActive', { userType: 1 })
       } else {
-        this.state.navigation.navigate('PublishActive', { userType: 1 })
+        this.state.navigation.navigate('PublishTrend', { userType: 1 })
       }
     }
   }
@@ -95,7 +95,7 @@ class Publish extends Component{
         transparent
         visible={!!visible}>
           <TouchableOpacity activeOpacity={1} style={styles.publishContainer} onPress={this.hideModal}>
-            <Animated.View style={{ transform: this.getContentInterpolate(this.path)}}>
+            {/* <Animated.View style={{ transform: this.getContentInterpolate(this.path)}}> */}
               <View style={styles.contentContainer}>
                 <TouchableOpacity style={styles.btnBg} onPress={() => this.toPublish('active')}>
                   <Image style={styles.icon} source={PublishIcon.activity}/>
@@ -106,7 +106,7 @@ class Publish extends Component{
                   <Text>发布动态</Text>
                 </TouchableOpacity>
               </View>
-            </Animated.View>
+            {/* </Animated.View> */}
           </TouchableOpacity>
       </Modal>
     )

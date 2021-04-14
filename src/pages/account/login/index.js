@@ -129,6 +129,7 @@ class Login extends Component {
       )
       this.props.setModalLoading(false)
       if (success) {
+        console.log('userInfo', data)
         setStorage('userInfo', data)
         this.props.setUserInfo(data)
         AsyncStorage.setItem('session', data.token)

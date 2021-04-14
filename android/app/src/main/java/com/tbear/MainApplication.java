@@ -7,6 +7,13 @@ import androidx.multidex.MultiDex;
 
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+//import cn.jiguang.imui.messagelist.ReactIMUIPackage;
+
+//import cn.jiguang.imui.chatinput.ReactIMUIPackage;
+// import cn.jiguang.imui.chatinput.ReactIMUIPackage;
+//import com.reactnativecommunity.geolocation.GeolocationPackage;
+//import com.reactnativecommunity.geolocation.GeolocationPackage;
+import com.brentvatne.react.ReactVideoPackage;
 import cn.jystudio.local.barcode.recognizer.LocalBarcodeRecognizerPackage;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
@@ -51,6 +58,10 @@ public class MainApplication extends Application implements ReactApplication {
         SoLoader.init(this, /* native exopackage */ false);
 //        initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
         MultiDex.install(this);
+
+//        View account = View.inflate(this, R.layout.account, null);
+//        navView = (NavigationView)account.findViewById(R.id.nav_view);
+//        Log.d("navView",navView.toString());
     }
 
     /**

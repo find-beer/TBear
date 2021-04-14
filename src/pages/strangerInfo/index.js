@@ -46,6 +46,7 @@ const imageUrl = {
 class StrangerInfo extends Component {
   constructor(props) {
     super(props)
+    console.log('props', props)
     this.state = {
       personalInfo: {},
       isFriend: true,
@@ -57,19 +58,36 @@ class StrangerInfo extends Component {
   componentWillMount() {}
   componentDidMount() {
     console.log('this.props.route.params.uid', this.props.route.params.uid)
+    this.fetchPersonInfo()
+  }
+
+  handleChat = () => {
+    this.props.navigation.navigate('Chatting',{uid:this.props.route.params.uid})
+  }
+
+  fetchPersonInfo = () => {
     GetRequest('user/userInfo', {
       userId: Number(this.props.route.params.uid),
     }).then((res) => {
-      console.log('personalInfo', res) //true
+      // console.log('personalInfo', res) //true
       this.setState({
         personalInfo: res.data,
       })
     })
   }
-
-  handleChat = () => {}
-
-  handleAddFtiend = () => {}
+  handleAddFtiend = () => {
+    if (this.state.uid) {
+      GetRequest(`/userRelation/addFriend/${this.state.uid}`).then((res) => {
+        if (res.code === 0) {
+          // 更新用户信息
+          this.fetchPersonInfo()
+          Toast.success(res.msg || '添加成功')
+        } else {
+          Toast.fail(res.msg || '添加失败，请稍后重试')
+        }
+      })
+    }
+  }
   handleRealtiveLine = () => {
     this.props.navigation.navigate('RelationChain', {
       uid: this.state.personalInfo.uid,

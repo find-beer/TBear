@@ -203,6 +203,9 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation project(path: ':@react-native-community_async-storage')
     implementation project(path: ':@react-native-community_viewpager')
+//    implementation project(':react-native-imui')
+//    implementation project(path:':react-native-imui')
+    implementation('com.amap.api:location:5.2.0')
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group: 'com.facebook.fbjni'

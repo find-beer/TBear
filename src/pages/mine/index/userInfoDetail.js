@@ -28,7 +28,6 @@ export default class UserInfoDetail extends React.Component {
 
   render() {
     const { userInfo } = this.props
-    console.log('userInfo222', userInfo)
     return (
       <View style={styles.InfoOuter}>
         <View style={styles.avatarWrapper}>

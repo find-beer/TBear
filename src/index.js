@@ -27,6 +27,7 @@ import PublishTrend from "./pages/publish/publishTrend";
 
 import Register from "./pages/account/register";
 
+import VideoDisplay from "./pages/home/videodisplay";
 
 
 import Hobby from "./pages/account/hobby";
@@ -58,6 +59,7 @@ import LocalTickets from "./pages/home/local_tickets";
 import LocalAddTicket from "./pages/home/local_add_ticket";
 import LocalModifyTicket from "./pages/home/local_modify_ticket";
 
+import Chatting from "./pages/chat/Chatting"
 /**
  * App主堆栈
  */
@@ -95,6 +97,7 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='ModifyTicket'       component={ModifyTicket}/>
       <Stack.Screen options={{ ...defautOptions, title: '用户信息' }}    name='StrangerInfo'       component={StrangerInfo}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='PublishTrend'       component={PublishTrend}/>
+      <Stack.Screen options={{ ...defautOptions, title: '' }}    name='VideoDisplay'       component={VideoDisplay}/>
       <Stack.Screen options={{ ...defautOptions, title: '选择票种' }}    name='TicketSelect'       component={TicketSelect}/>
       <Stack.Screen options={{ ...defautOptions, title: '活动列表' }}    name='ActivityList'       component={ActivityList}/>
       <Stack.Screen options={{ ...defautOptions, title: '关系链' }}    name='RelationChain'      component={RelationChain}/>
@@ -104,6 +107,7 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '互动通知' }}    name='InteractiveList'    component={InteractiveList}/>
       <Stack.Screen options={{ ...defautOptions, title: '活动列表' }}    name='ActivityMsgList'    component={ActivityMsgList}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='LocalModifyTicket'  component={LocalModifyTicket}/>
+      <Stack.Screen options={{ ...defautOptions, title: '聊天' }}    name='Chatting'  component={Chatting}/>
     </Stack.Navigator>
   )
 }

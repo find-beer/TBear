@@ -1,8 +1,18 @@
 rootProject.name = 'TBear'
+// include ':react-native-imui'
+// project(':react-native-imui').projectDir = new File(rootProject.projectDir, '../libs/react-native-imui/android')
+// include ':react-native-imui:chatinput'
+// include ':react-native-imui:messagelist'
+// include ':react-native-imui:popuptool'
+// include ':react-native-imui:emoji'
+// include ':react-native-imui:photoViewPagerview'
+// include ':react-native-imui:photoViewPagerview:photodraweeview'
+include ':@react-native-community_geolocation'
+project(':@react-native-community_geolocation').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/geolocation/android')
+include ':react-native-video'
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android')
 include ':react-native-local-barcode-recognizer'
 project(':react-native-local-barcode-recognizer').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-local-barcode-recognizer/android')
-include ':react-native-camera'
-project(':react-native-camera').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-camera/android')
 include ':react-native-camera'
 project(':react-native-camera').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-camera/android')
 include ':react-native-fs'
@@ -13,7 +23,5 @@ include ':@react-native-community_async-storage'
 project(':@react-native-community_async-storage').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/async-storage/android')
 include ':@react-native-community_viewpager'
 project(':@react-native-community_viewpager').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/viewpager/android')
-include ':@react-native-community_async-storage'
-project(':@react-native-community_async-storage').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/async-storage/android')
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'

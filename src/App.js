@@ -21,6 +21,7 @@ import SelectItemsDialog from "./components/select_dialog/SelectItemsDialog";
 import { GetRequest } from "./utils/request";
 import { removeStorage } from './utils/storage'
 
+
 LogBox.ignoreAllLogs(true);
 
 export default class App extends React.Component {
@@ -62,6 +63,7 @@ export default class App extends React.Component {
           onPress={(which) => {}}
         />
       </View>
+     
     );
   }
 }

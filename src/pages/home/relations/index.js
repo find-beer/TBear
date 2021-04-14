@@ -13,70 +13,82 @@
  * @flow strict-local
  */
 
-import React from "react";
-import { FlatList, Text, RefreshControl, StyleSheet, View, Dimensions } from "react-native";
-import ActivityItem from "../../../components/activity_item/activityItem";
-import DynamicItem from "../../../components/dynamic_item/dynamicItem";
-import { bindActions, bindState, connect } from "../../../redux";
+import React from 'react'
+import {
+  FlatList,
+  Text,
+  RefreshControl,
+  StyleSheet,
+  View,
+  Dimensions,
+} from 'react-native'
+import ActivityItem from '../../../components/activity_item/activityItem'
+import DynamicItem from '../../../components/dynamic_item/dynamicItem'
+import { bindActions, bindState, connect } from '../../../redux'
 const { width, height } = Dimensions.get('window')
 const emptyHeight = height - 200
 class Relations extends React.Component {
   constructor(props) {
-    super(props);
+    console.log('relations', props)
+    super(props)
     this.state = {
       relationDetailList: [],
       isRefreshing: false,
       userInfo: props.userInfo,
       offset: 0,
       limit: 10,
-      hasMore: true
-    };
+      hasMore: true,
+    }
   }
 
   static getDerivedStateFromProps(nextProps) {
-    const { userInfo } = nextProps;
+    const { userInfo } = nextProps
     return {
       userInfo,
-    };
+    }
   }
 
   componentDidMount() {
-    this.getData();
+    this.getData()
   }
 
   componentDidUpdate(prevProps, prevState) {
     const { userInfo } = prevProps
     if (userInfo !== this.props.userInfo && this.props.userInfo.uid) {
-      this.getData();
+      this.getData()
     }
   }
   onBtnClick = (activity) => {
-    const { navigation } = this.props;
-    navigation.navigate("ActivityDetail", {
+    const { navigation } = this.props
+    navigation.navigate('ActivityDetail', {
       id: activity.id,
       refresh: () => this.getData(),
     })
   }
 
   renderItem = (rowData) => {
-    const activity = rowData.item.activityDetailVO;
-    const feed = rowData.item.feedDetailVO;
+    const activity = rowData.item.activityDetailVO
+    const feed = rowData.item.feedDetailVO
     if (activity) {
       return (
-        <ActivityItem 
+        <ActivityItem
           {...this.props}
           activity={activity}
           userId={this.state.userId}
           onBtnClick={() => this.onBtnClick(activity)}
         />
-      );
+      )
     }
     if (feed) {
       return (
-        <DynamicItem {...this.props} feed={feed} userId={this.state.userId} />
-      );
+        <DynamicItem
+          {...this.props}
+          feed={feed}
+          userId={this.state.userInfo.uid}
+        />
+      )
     }
-  };
+  }
 
   getData = async (offeset) => {
     try {
@@ -85,16 +97,21 @@ class Relations extends React.Component {
         feedOffsetId: 0,
         activityOffsetId: 0,
       }
-      const { success, data, msg } = await this.props.get("/user/relationfeed", payload);
+      const { success, data, msg } = await this.props.get(
+        '/user/relationfeed',
+        payload
+      )
       if (success) {
-        this.setState({
-          relationDetailList: data.relationDetailList,
-        });
+        this.setState(
+          {
+            relationDetailList: data.relationDetailList,
+          },
+        )
       }
-    } catch(e) {
-      console.log('error' ,e)
+    } catch (e) {
+      console.log('error', e)
     }
-  };
+  }
 
   renderEmpty = () => {
     return (
@@ -105,7 +122,8 @@ class Relations extends React.Component {
   }
 
   render() {
-    const { relationDetailList, isRefreshing, userInfo } = this.state;
+    const { relationDetailList, isRefreshing, userInfo } = this.state
+    console.log('this.state', this.state)
     return (
       <View style={styles.container}>
         <FlatList
@@ -122,7 +140,7 @@ class Relations extends React.Component {
           }
         />
       </View>
-    );
+    )
   }
 }
 
@@ -138,11 +156,11 @@ const styles = StyleSheet.create({
     width,
     height: height - 200,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   noDataText: {
-    color: '#888889'
-  }
-});
+    color: '#888889',
+  },
+})
 
-export default connect(bindState, bindActions)(Relations);
+export default connect(bindState, bindActions)(Relations)

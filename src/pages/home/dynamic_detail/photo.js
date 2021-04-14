@@ -27,9 +27,8 @@ export default class Photo extends React.Component{
                                 currentIndex: index,
                                 visible: true
                             })
-                        }}>
+                        }} key={index}>
                             <Image
-                                key={index}
                                 source={{uri:item.replace('https','http')}}
                                 style={styles.photo}
                             ></Image>
