@@ -20,7 +20,7 @@ import CustomTabBar from '../../components/scrollable_tab_bar/CustomTabBar'
 import Relations from './relations'
 import Trends from './trends'
 import NotLogin from './../../components/notLogin'
-import { getStorage } from './../../utils/storage'
+import { getStorage, removeStorage } from './../../utils/storage'
 import {
   addLocationListener,
   Geolocation,
@@ -44,11 +44,11 @@ class Home extends React.Component {
     }
   }
   componentDidMount() {
+    removeStorage('messages')
     this.props.setModalLoading(false)
     this.initUserInfo()
     this.initIM()
   }
-
   initUserInfo = async () => {
     const userInfo = await getStorage('userInfo')
     if (userInfo.uid) {

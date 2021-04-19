@@ -48,6 +48,7 @@ import ModifyTicket from "./pages/home/modify_ticket";
 import Tickets from "./pages/home/tickets";
 import InteractiveList from "./pages/chat/interactive";
 import DigFriend from "./pages/chat/dig_friends";
+import SettingP2p from "./pages/chat/setting";
 import FriendsList from "./pages/chat/FriendsList";
 import MyFollow from "./pages/chat/MyFollow";
 import FansList from "./pages/chat/FansList";
@@ -108,6 +109,7 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '活动列表' }}    name='ActivityMsgList'    component={ActivityMsgList}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='LocalModifyTicket'  component={LocalModifyTicket}/>
       <Stack.Screen options={{ ...defautOptions, title: '聊天' }}    name='Chatting'  component={Chatting}/>
+      <Stack.Screen options={{ ...defautOptions, title: '' }}    name='SettingP2p'  component={SettingP2p}/>
     </Stack.Navigator>
   )
 }

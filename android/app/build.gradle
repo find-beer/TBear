@@ -163,6 +163,7 @@ android {
     }
     buildTypes {
         debug {
+            matchingFallbacks = ['debug']
             signingConfig signingConfigs.debug
         }
         release {
@@ -170,6 +171,7 @@ android {
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
+            matchingFallbacks = ['release']
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
@@ -179,7 +181,12 @@ android {
         javaMaxHeapSize '4g'
     }
 
-    // applicationVariants are e.g. debug, release
+//    lintOptions {
+//        checkReleaseBuilds false
+//        abortOnError false
+//    }
+
+        // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             // For each separate APK per architecture, set a unique version code as described here:
@@ -206,6 +213,7 @@ dependencies {
 //    implementation project(':react-native-imui')
 //    implementation project(path:':react-native-imui')
     implementation('com.amap.api:location:5.2.0')
+    implementation 'org.codehaus.groovy:groovy-all:2.4.12'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group: 'com.facebook.fbjni'

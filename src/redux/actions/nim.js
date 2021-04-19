@@ -35,6 +35,7 @@ onMsg = (msg) => {
 };
 
 
+
 const sendMsgDone = (error, msg) => {
   console.log('发送' + msg.scene + ' ' + msg.type + '消息' + (!error?'成功':'失败') + ', id=' + msg.idClient);
   pushMsg(msg);

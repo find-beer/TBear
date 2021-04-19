@@ -41,27 +41,22 @@ export default class FriendsList extends React.Component {
       )
     })
   }
+  // 去好友主界面
   handleGoNewFriendPage(item) {
-    // this.props.navigation.navigate('StrangerInfo', {
-    //   uid: item.userVO?.userId || '',
-    // })
     this.props.navigation.navigate('StrangerInfo', {
       uid: item.uid || '',
     })
-    // if (item) {
-    //   this.props.navigation.navigate('StrangerInfo', {
-    //     uid: item.userVO?.userId || '',
-    //   })
-    // } else {
-    //   this.props.navigation.navigate('StrangerInfo', { uid: null })
-    // }
+  }
+  // 挖好友
+  handleGoDigFriendPage() {
+    this.props.navigation.navigate('DigFriend')
   }
   render() {
     return (
       <Fragment>
         <SafeAreaView style={{ backgroundColor: 'white' }}>
           <View style={styles.main}>
-            <TouchableOpacity onPress={() => this.handleGoNewFriendPage()}>
+            <TouchableOpacity onPress={() => this.handleGoDigFriendPage()}>
               <View style={styles.newFriendBox}>
                 <View style={styles.newFriendIconBox}>
                   <Image style={styles.newFriendIcon} source={addIcon} />

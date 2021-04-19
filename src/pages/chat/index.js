@@ -164,7 +164,9 @@ class Chat extends React.Component {
     // this.initChat()
   }
 
-  onRightClick = () => {}
+  onRightClick = () => {
+    this.props.navigation.navigate('DigFriend')
+  }
 
   toPage = (route) => {
     this.props.navigation.navigate(route)

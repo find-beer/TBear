@@ -34,6 +34,7 @@ class Setting extends Component {
 
     logout = async () => {
         await removeStorage('userInfo')
+        await removeStorage('messages')
         this.props.setUserInfo({})
         this.props.navigation.navigate('Home')
     }
