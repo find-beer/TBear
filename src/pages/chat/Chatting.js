@@ -15,11 +15,19 @@ import {
   Image,
   Alert,
   Button,
+  ActivityIndicator,
 } from 'react-native'
 import { NimSession, NimFriend } from 'react-native-netease-im'
 // import { ChatInput, MessageList } from 'react-native-imui'
 import React from 'react'
-import { GiftedChat, Bubble, Send, IMessage } from 'react-native-gifted-chat'
+import {
+  GiftedChat,
+  Bubble,
+  Send,
+  IMessage,
+  Actions,
+  renderActions,
+} from 'react-native-gifted-chat'
 import { screenW } from '../../constants'
 import { connect, bindActions, bindState } from './../../redux'
 import { GetRequest } from '../../utils/request'
@@ -28,41 +36,43 @@ import { scaleSize, scaleFont } from '../../utils/scaleUtil'
 import { setStorage, getStorage, removeStorage } from '../../utils/storage'
 const SDK = require('../../../nim/NIM_Web_SDK_rn_v7.2.0.js')
 import md5 from '../../utils/md5'
+import { TouchableOpacity } from 'react-native-gesture-handler'
+import Item from '@ant-design/react-native/lib/list/ListItem'
+import ImagePicker from 'react-native-image-picker'
+import AsyncStorage from '@react-native-community/async-storage'
 const data = {}
+const images = {
+  uploadpictures: require('../../assets/chat/uploadpictures.png'),
+  sendvoice: require('../../assets/chat/sendvoice.png'),
+  sendmood: require('../../assets/chat/sendmood.png'),
+  addmore: require('../../assets/chat/addmore.png'),
+}
+let imagesArr = []
 class Chatting extends React.Component {
   constructor(props) {
     super(props)
-    // console.log('propsChating', this.props.userInfo)
-    // console.log('ChatingUid', Number(this.props.route.params.uid))
+    console.log('propsChating', this.props)
+    console.log('ChatingUid', Number(this.props.route.params.uid))
     this.state = {
       userInfo: this.props.userInfo,
       messages: [],
       frinedInfo: {}, // 好友的信息
       friendUid: this.props.route.params.uid,
+      isLoadingEarlier: false,
+      token: null,
+      images: [],
     }
   }
 
   componentDidMount() {
     console.log('componentDidMount')
+    // 获取token
+    AsyncStorage.getItem('session', (error, result) => {
+      this.setState({ token: result })
+    })
     this.fetchFrinedInfo()
     this.initChat()
 
-    // NimSession.startSession('wzy', '2')
-    // NimSession.getRecentContactList().then(
-    //   (data) => {
-    //     console.log('聊天内容：', data)
-    //   },
-    //   (err) => {
-    //     console.log('聊天err：', err)
-    //   }
-    // )
-    // NativeAppEventEmitter.addListener('observeReceiveMessage', (data) => {
-    //   console.log('observeReceiveMessage', data)
-    // })
-    // const res = NimSession.sendTextMessage(
-    //   '你好，我是一条来自魏志扬发送的消息，请注意查收哦',
-    //   ['mjx']
-    // )
     getStorage('messages').then((res) => {
       // console.log('============messages=============', res)
       if (res) {
@@ -149,6 +159,7 @@ class Chatting extends React.Component {
 
   onDisconnect = (options) => {
     console.log('onDisconnect', options)
+    Alert.alert(options['message'])
   }
 
   onError = (options) => {
@@ -169,16 +180,16 @@ class Chatting extends React.Component {
     this.pushMsg(options)
   }
 
-  getHistoryMsgs = () => {
-    this.instance.getLocalMsgs({
-      sessionId: 'p2p-' + this.state.friendUid,
-      limit: 100,
-      done: this.getLocalMsgsDone,
-    })
-  }
-  getLocalMsgsDone = (error, obj) => {
-    console.log('获取本地消息' + (!error ? '成功' : '失败'), error, obj)
-  }
+  // getHistoryMsgs = () => {
+  //   this.instance.getLocalMsgs({
+  //     sessionId: 'p2p-' + this.state.friendUid,
+  //     limit: 100,
+  //     done: this.getLocalMsgsDone,
+  //   })
+  // }
+  // getLocalMsgsDone = (error, obj) => {
+  //   console.log('获取本地消息' + (!error ? '成功' : '失败'), error, obj)
+  // }
 
   pushMsg = (msgs) => {
     if (!Array.isArray(msgs)) {
@@ -257,9 +268,9 @@ class Chatting extends React.Component {
     return (
       <Send {...props}>
         <View>
-          <Button style={styles.registerBtnBox}>
+          <TouchableOpacity style={styles.registerBtnBox}>
             <Text style={styles.registerBtnText}>发送</Text>
-          </Button>
+          </TouchableOpacity>
         </View>
       </Send>
     )
@@ -282,10 +293,124 @@ class Chatting extends React.Component {
       />
     )
   }
+  renderInputToolbar = (props) => {
+    return <InputToolbar {...props} containerStyle={styles.inputToolbar} />
+  }
+
+  choosePicture = () => {
+    const { images, token } = this.state
+    const options = {
+      title: '选择',
+      cancelButtonTitle: '取消',
+      takePhotoButtonTitle: '拍照',
+      chooseFromLibraryButtonTitle: '媒体库',
+      cameraType: 'back',
+      mediaType: 'photo',
+      videoQuality: 'low',
+      durationLimit: 10,
+      maxWidth: 600,
+      maxHeight: 600,
+      aspectX: 2,
+      aspectY: 1,
+      quality: 0.5,
+      angle: 0,
+      allowsEditing: false,
+      noData: false,
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    }
+
+    let currentHeader
+    if (Platform.OS === 'ios') {
+      currentHeader = {
+        'Content-Type': 'multipart/form-data;charset=utf-8',
+        token,
+      }
+    } else {
+      currentHeader = {
+        Accept: 'application/json',
+        token,
+      }
+    }
+
+    ImagePicker.showImagePicker(options, (response) => {
+      console.log('Response', response)
+      // this.props.setModalLoading(true, '上传中')
+      // let formData = new FormData()
+      // formData.append('imgFile', {
+      //   uri:
+      //     Platform.OS === 'ios'
+      //       ? 'data:image/jpeg;base64,' + response.data
+      //       : response.uri,
+      //   type: 'multipart/form-data',
+      //   name: 'trend' + new Date().getTime() + '.jpg',
+      // })
+      // fetch(apiProd.host + 'common/uploadImage', {
+      //   method: 'POST',
+      //   headers: currentHeader,
+      //   body: formData,
+      // })
+      //   .then((response) => {
+      //     return response.json()
+      //   })
+      //   .then((res) => {
+      //     imagesArr.push(res.data.url)
+      //     this.setState(
+      //       {
+      //         images: imagesArr,
+      //       },
+      //       () => {
+      //         this.props.setModalLoading(false)
+      //         // console.log('images', this.state.images)
+      //       }
+      //     )
+      //   })
+      //   .catch((e) => {
+      //     this.props.setModalLoading(false)
+      //     Toast.toast('上传失败，请重试')
+      //   })
+    })
+  }
+
+  uploadpictures = () => {
+    console.log('上传图片')
+    this.choosePicture()
+  }
+  sendvoice = () => {
+    console.log('发送语音')
+  }
+  sendmood = () => {
+    console.log('发送表情包')
+  }
+  addmore = () => {
+    console.log('添加更多')
+  }
+  uploadImage = () => {}
 
   render() {
     const { messages } = this.state
     const { name, headPicUrl, uid } = this.state.userInfo
+
+    const list = [
+      {
+        icon: images.uploadpictures,
+        handler: 'uploadpictures',
+      },
+      {
+        icon: images.sendvoice,
+        handler: 'sendvoice',
+      },
+      {
+        icon: images.sendmood,
+        handler: 'sendmood',
+      },
+      {
+        icon: images.addmore,
+        handler: 'addmore',
+      },
+    ]
     return (
       <>
         {this.state.messages.length === 0 && (
@@ -317,12 +442,34 @@ class Chatting extends React.Component {
           placeholder={'开始聊天吧'}
           renderSend={this.renderSend}
           renderBubble={this.renderBubble}
+          minInputToolbarHeight={70}
+          renderInputToolbar={this.renderInputToolbar}
           user={{
             _id: uid,
             name: name,
             avatar: headPicUrl,
           }}
+          // onLoadEarlier={this.onLoadEarlier}
+          alwaysShowSend={true}
+          renderLoading={() => <ActivityIndicator />}
+          isAnimated
+          // renderAvatarOnTop
+          scrollToBottom={true}
+          // alignTop={true}
         />
+
+        <View style={styles.sendWrap}>
+          {list.map((item, index) => {
+            return (
+              <TouchableOpacity
+                key={index + 'icon'}
+                onPress={() => this[item.handler]()}
+              >
+                <Image source={item.icon} style={styles.icon} />
+              </TouchableOpacity>
+            )
+          })}
+        </View>
 
         {/* <MessageList
           style={styles.messageList}
@@ -390,13 +537,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerBtnBox: {
-    width: '100%',
-    height: scaleSize(120),
-    borderRadius: scaleSize(40),
-    backgroundColor: '#8A8DF9',
-    marginTop: scaleSize(70),
+    // width: '100%',
+    width: scaleSize(200),
+    // height: scaleSize(120),
+    height: scaleSize(100),
+    borderRadius: scaleSize(80),
+    backgroundColor: '#564F5F',
+    // marginTop: scaleSize(70),
   },
   registerBtnText: {
     color: '#fff',
+    textAlign: 'center',
+    lineHeight: scaleSize(100),
+    fontSize: 19,
+  },
+  sendWrap: {
+    // height: 45,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: scaleSize(30),
+  },
+  icon: {
+    width: scaleSize(64),
+    height: scaleSize(64),
+    // marginRight: scaleSize(200),
+  },
+  uploadImage: {
+    width: scaleSize(64),
+    height: scaleSize(64),
+  },
+  inputToolbar: {
+    marginLeft: 15,
+    marginRight: 15,
+    marginBottom: 10,
+    borderWidth: 0.5,
+    borderColor: 'grey',
+    borderRadius: 25,
   },
 })
