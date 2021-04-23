@@ -32,6 +32,7 @@ export default class DynamicTab extends Component {
       currentTab: name,
     })
   }
+  // 自己
   requestCurrent() {
     GetRequest('activity/user', this.state.pageInfo).then((res) => {
       this.setState({
@@ -60,11 +61,12 @@ export default class DynamicTab extends Component {
     }).then((res) => {
       this.setState({
         dynamicList: res.data || [],
-        dynamicList,
+        // dynamicList,
       })
     })
   }
   componentDidMount() {
+    //有uid
     this.state.uid ? this.requestStranger() : this.requestCurrent()
     EventBus.on('REFRESH_TREND', () => {
       this.state.uid ? this.requestStranger() : this.requestCurrent()

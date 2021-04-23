@@ -42,11 +42,12 @@ const imageUrl = {
   relative: require('../../assets/stranger/guanxilian.png'),
   addFriend: require('../../assets/chat/addFriend.png'),
 }
+const SDK = require('../../../nim/NIM_Web_SDK_rn_v7.2.0')
 
 class StrangerInfo extends Component {
   constructor(props) {
     super(props)
-    console.log('props', props)
+    console.log('props===============>>', props)
     this.state = {
       personalInfo: {},
       isFriend: true,
@@ -57,12 +58,15 @@ class StrangerInfo extends Component {
 
   componentWillMount() {}
   componentDidMount() {
-    console.log('this.props.route.params.uid', this.props.route.params.uid)
+    // console.log('this.props.route.params.uid', this.props.route.params.uid)
     this.fetchPersonInfo()
+    this.initNotify()
   }
 
   handleChat = () => {
-    this.props.navigation.navigate('Chatting',{uid:this.props.route.params.uid})
+    this.props.navigation.navigate('Chatting', {
+      uid: this.props.route.params.uid,
+    })
   }
 
   fetchPersonInfo = () => {
@@ -70,9 +74,14 @@ class StrangerInfo extends Component {
       userId: Number(this.props.route.params.uid),
     }).then((res) => {
       // console.log('personalInfo', res) //true
-      this.setState({
-        personalInfo: res.data,
-      })
+      this.setState(
+        {
+          personalInfo: res.data,
+        },
+        () => {
+          console.log('personalInfo', this.state.personalInfo)
+        }
+      )
     })
   }
   handleAddFtiend = () => {
@@ -95,11 +104,57 @@ class StrangerInfo extends Component {
   }
   // 关注
   handleConcer = () => {
+    // GetRequest(`/userRelation/follow/${this.state.personalInfo.uid}`).then(
+    //   () => {
+    //     this.initPage()
+    //   }
+    // )
     GetRequest(`/userRelation/follow/${this.state.personalInfo.uid}`).then(
-      () => {
-        this.initPage()
+      (res) => {
+        if (res.code === 0) {
+          this.setState({})
+          var content = {
+            type: 1,
+            value: '关注你了'
+        };
+        content = JSON.stringify(content);
+          this.instance.sendCustomSysMsg({
+            scene: 'p2p',
+            to: this.state.personalInfo.uid,
+            content: content,
+            sendToOnlineUsersOnly: false,
+            apnsText: content,
+            antiSpamContent:true,
+            done: (error, msg) => {
+              console.log('发送' + msg.scene + '自定义系统通知' + (!error?'成功':'失败') + ', id=' + msg.idClient);
+              console.log(error);
+              console.log(msg);
+            },
+          })
+        }
       }
     )
+  }
+  initNotify = () => {
+    const { iminfo } = this.props.userInfo
+    const { accid, token } = iminfo
+    // utils.initIM(accid, token)
+    this.instance = SDK.NIM.getInstance({
+      debug: true,
+      appKey: '67b35e65c41efd1097ef8504d5a88455',
+      token,
+      account: accid,
+      db: false, // 不使用数据库
+      onofflinecustomsysmsgs: this.onOfflineCustomSysMsgs,
+      oncustomsysmsg: this.onCustomSysMsg,
+    })
+  }
+
+  onOfflineCustomSysMsgs = (sysMsgs) => {
+    console.log('收到离线自定义系统通知', sysMsgs)
+  }
+  onCustomSysMsg = (sysMsg) => {
+    console.log('收到自定义系统通知', sysMsg)
   }
 
   render() {
@@ -122,35 +177,38 @@ class StrangerInfo extends Component {
                   <UserInfoDetail userInfo={this.state.personalInfo} />
                 </View>
               </ImageBackground>
-              <View style={styles.operateBox}>
-                {this.state.personalInfo.userType === 0 && (
-                  <View style={styles.chatBox}>
-                    {this.state.personalInfo.friend === true ? (
-                      // 是好友
-                      <TouchableOpacity onPress={this.handleChat}>
-                        <View style={styles.centerStyle}>
-                          <Image
-                            style={styles.operateIcon}
-                            source={imageUrl.relative}
-                          />
-                          <Text style={styles.operateText}>聊天</Text>
-                        </View>
-                      </TouchableOpacity>
-                    ) : (
-                      // 不是好友
-                      <TouchableOpacity onPress={this.handleAddFtiend}>
-                        <View style={styles.centerStyle}>
-                          <Image
-                            style={styles.operateIcon}
-                            source={imageUrl.addFriend}
-                          />
-                          <Text style={styles.operateText}>添加好友</Text>
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                )}
-                {/* {
+              {this.state.uid !== this.props.userInfo.uid && (
+                <View style={styles.operateBox}>
+                  {this.state.personalInfo.userType === 0 && (
+                    <View style={styles.chatBox}>
+                      {this.state.personalInfo.friend === true ||
+                      this.props.userInfo.province ===
+                        this.state.personalInfo.province ? (
+                        // 是好友获取同城就可以聊天
+                        <TouchableOpacity onPress={this.handleChat}>
+                          <View style={styles.centerStyle}>
+                            <Image
+                              style={styles.operateIcon}
+                              source={imageUrl.relative}
+                            />
+                            <Text style={styles.operateText}>聊天</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ) : (
+                        // 不是好友
+                        <TouchableOpacity onPress={this.handleAddFtiend}>
+                          <View style={styles.centerStyle}>
+                            <Image
+                              style={styles.operateIcon}
+                              source={imageUrl.addFriend}
+                            />
+                            <Text style={styles.operateText}>添加好友</Text>
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
+                  {/* {
 									this.state.personalInfo.friend &&
 									<View style={styles.relativeBox}>
 										<TouchableOpacity  onPress={this.handleRealtiveLine}>
@@ -161,29 +219,30 @@ class StrangerInfo extends Component {
 										</TouchableOpacity>
 									</View>
 								} */}
-                {
-                  // 非好友，普通人进入商家
-                  !this.state.personalInfo.friend &&
-                    this.state.personalInfo.userType === 1 &&
-                    this.state.loginUser.userType === 2 && (
-                      <View style={styles.relativeBox}>
-                        <TouchableOpacity onPress={this.handleConcer}>
-                          <View style={styles.centerStyle}>
-                            <Image
-                              style={styles.operateIcon}
-                              source={imageUrl.relative}
-                            />
-                            <Text style={styles.operateText}>
-                              {this.state.personalInfo.isConcer
-                                ? '已关注'
-                                : '关注'}
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                      </View>
-                    )
-                }
-              </View>
+                  {
+                    // 非好友，普通人进入商家
+                    !this.state.personalInfo.friend &&
+                      this.state.personalInfo.userType === 1 &&
+                      this.props.userInfo.userType === 0 && (
+                        <View style={styles.relativeBox}>
+                          <TouchableOpacity onPress={this.handleConcer}>
+                            <View style={styles.centerStyle}>
+                              <Image
+                                style={styles.operateIcon}
+                                source={imageUrl.relative}
+                              />
+                              <Text style={styles.operateText}>
+                                {this.state.personalInfo.isConcer
+                                  ? '已关注'
+                                  : '关注'}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
+                      )
+                  }
+                </View>
+              )}
               <View style={styles.lineSpace} />
               <DynamicTab
                 uid={this.state.uid}

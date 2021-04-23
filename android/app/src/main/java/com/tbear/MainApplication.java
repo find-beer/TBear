@@ -7,6 +7,7 @@ import androidx.multidex.MultiDex;
 
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import cn.jystudio.local.barcode.recognizer.LocalBarcodeRecognizerPackage;
 //import cn.jiguang.imui.messagelist.ReactIMUIPackage;
 
 //import cn.jiguang.imui.chatinput.ReactIMUIPackage;

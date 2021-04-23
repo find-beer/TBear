@@ -21,6 +21,7 @@ import Relations from './relations'
 import Trends from './trends'
 import NotLogin from './../../components/notLogin'
 import { getStorage, removeStorage } from './../../utils/storage'
+import * as nim from '../../utils/nimAddFriend'
 import {
   addLocationListener,
   Geolocation,
@@ -48,6 +49,7 @@ class Home extends React.Component {
     this.props.setModalLoading(false)
     this.initUserInfo()
     this.initIM()
+    // nim.initIM()
   }
   initUserInfo = async () => {
     const userInfo = await getStorage('userInfo')
@@ -61,6 +63,7 @@ class Home extends React.Component {
     const { iminfo } = this.props.userInfo
     if (iminfo) {
       const { accid, token } = iminfo
+      // nim.initIM(accid, token)
       this.instance = SDK.NIM.getInstance({
         debug: true,
         appKey: '67b35e65c41efd1097ef8504d5a88455',

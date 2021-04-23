@@ -22,7 +22,7 @@ const defaultAvatar =
 class FeedItem extends Component {
   constructor(props) {
     super(props)
-    console.log('this.props ----> ', this.props)
+    // console.log('this.props ----> ', this.props)
     this.state = {
       data: props.data,
       loginUid: this.props.loginUid || '',
@@ -38,7 +38,7 @@ class FeedItem extends Component {
   handleGoStrangerPage() {
     const { userVO } = this.state.data
     if (userVO && userVO.userId) {
-      this.props.navigation.navigate('StrangerInfo', { userId })
+      this.props.navigation.navigate('StrangerInfo', { uid:userVO.userId })
     }
   }
   handleGoVideoplay(item) {

@@ -35,12 +35,14 @@ import { getDayTime } from '../../utils/date'
 import { scaleSize, scaleFont } from '../../utils/scaleUtil'
 import { setStorage, getStorage, removeStorage } from '../../utils/storage'
 const SDK = require('../../../nim/NIM_Web_SDK_rn_v7.2.0.js')
-import md5 from '../../utils/md5'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import Item from '@ant-design/react-native/lib/list/ListItem'
 import ImagePicker from 'react-native-image-picker'
 import AsyncStorage from '@react-native-community/async-storage'
+import md5 from '../../utils/md5'
+import RNFS from 'react-native-fs'
 const data = {}
+
 const images = {
   uploadpictures: require('../../assets/chat/uploadpictures.png'),
   sendvoice: require('../../assets/chat/sendvoice.png'),
@@ -65,13 +67,13 @@ class Chatting extends React.Component {
   }
 
   componentDidMount() {
-    console.log('componentDidMount')
+    console.log('componentDidMount', md5)
     // 获取token
     AsyncStorage.getItem('session', (error, result) => {
       this.setState({ token: result })
     })
-    this.fetchFrinedInfo()
     this.initChat()
+    this.fetchFrinedInfo()
 
     getStorage('messages').then((res) => {
       // console.log('============messages=============', res)
@@ -132,8 +134,8 @@ class Chatting extends React.Component {
     })
   }
 
-  // 发送信息
-  onSend(newMessages = []) {
+  // 发送文本信息
+  onSend = (newMessages = []) => {
     console.log('newMessages', newMessages)
     // 发送信息
     this.instance.sendText({
@@ -147,7 +149,137 @@ class Chatting extends React.Component {
       },
     })
   }
+  // 根据文件类型发送
+  onSendByType = (data) => {
+    // const { name, headPicUrl, uid } = this.state.userInfo
+    // const newImageMessages = []
+    // const dataURL = 'data:image/jpeg;base64,' + data.data
+    // newImageMessages.push({
+    //   createdAt: getDayTime(new Date()),
+    //   user: {
+    //     _id: uid,
+    //     name: name,
+    //     avatar: headPicUrl,
+    //   },
+    //   _id: Math.round(Math.random() * 1000000),
+    //   image: dataURL,
+    // })
+    // this.setState(
+    //   (previousState) => {
+    //     console.log('previousState', previousState)
+    //     return {
+    //       messages: GiftedChat.append(previousState.messages, newImageMessages),
+    //     }
+    //   },
+    //   () => {
+    //     console.log('messages2', this.state.messages)
+    //     setStorage('messages', JSON.stringify(this.state.messages))
+    //   }
+    // )
+    // 发送图片
 
+    const dataURL = 'data:image/jpeg;base64,' + data.data
+    var blob = SDK.NIM.blob.fromDataURL(dataURL)
+    const fastPassParams = {
+      w: data.width,
+      h: data.height,
+      // md5: md5,
+    }
+    console.log('==================', JSON.stringify(fastPassParams))
+    this.instance.previewFile({
+      type: 'image',
+      blob: blob,
+      fastPass: JSON.stringify(fastPassParams),
+      uploadprogress: (obj) => {
+        console.log('文件总大小: ' + obj.total + 'bytes')
+        console.log('已经上传的大小: ' + obj.loaded + 'bytes')
+        console.log('上传进度: ' + obj.percentage)
+        console.log('上传进度文本: ' + obj.percentageText)
+      },
+      done: (error, file) => {
+        console.log('file', file)
+        console.log('上传image' + (!error ? '成功' : '失败'))
+        // show file to the user
+        if (!error) {
+          var msg = this.instance.sendFile({
+            scene: 'p2p',
+            to: this.state.frinedInfo.uid,
+            file: file,
+            done: (error, msg) => {
+              console.log('error================' + error)
+              console.log('msg==================' + msg)
+              if (!error) {
+                this.pushMsg(msg)
+              }
+            },
+          })
+          console.log('正在发送p2p image消息, id=' + msg.idClient)
+          pushMsg(msg)
+        }
+      },
+    })
+
+    // if (data.type === 'image/jpeg') {
+    //   const dataURL = 'data:image/jpeg;base64,' + data.data
+    //   //console.log('111' + JSON.stringify(SDK.NIM.blob))
+    //   var blob = SDK.NIM.blob.fromDataURL(dataURL)
+    //   console.log('blob===========', blob)
+    //   // const newMd5 = md5.createHash(data.data)
+    //   // const newMd5 = md5.createHash(data.uri)
+    //   // const newMd5 = md5.createHash(data.path)
+    //   // const newMd5 = md5.createHash(blob.data.blobId)
+    //   // RNFS.hash(data.path, 'md5').then((md5) => {
+    //   // console.log('md5===========', md5)
+    //   const fastPassParams = {
+    //     w: data.width,
+    //     h: data.height,
+    //     // md5: md5,
+    //   }
+    //   // var width = data.width
+    //   // var height = data.height
+    //   console.log('fastPassParams', fastPassParams)
+    //   // const formData = new FormData()
+    //   // 需要上传的文件
+    //   this.instance.sendFile({
+    //     scene: 'p2p',
+    //     to: this.state.frinedInfo.uid,
+    //     blob: blob,
+    //     //fileInput: file,
+    //     fastPass: JSON.stringify(fastPassParams),
+    //     beginupload: this.beginupload,
+    //     uploadprogress: (obj) => {
+    //       console.log('文件总大小: ' + obj.total + 'bytes')
+    //       console.log('已经上传的大小: ' + obj.loaded + 'bytes')
+    //       console.log('上传进度: ' + obj.percentage)
+    //       console.log('上传进度文本: ' + obj.percentageText)
+    //     },
+    //     uploaddone: (error, file) => {
+    //       console.log(error)
+    //       console.log(file)
+    //       console.log('上传' + (!error ? '成功' : '失败'))
+    //     },
+    //     beforesend: (msg) => {
+    //       console.log('正在发送p2p image消息, id=' + msg.idClient)
+    //       pushMsg(msg)
+    //     },
+    //     done: (error, msg) => {
+    //       console.log('error================' + error)
+    //       console.log('msg==================' + msg)
+    //       if (!error) {
+    //         console.log('发送图片', msg)
+    //         // this.pushMsg(msg)
+    //       }
+    //     },
+    //   })
+    //   // })
+    // }
+  }
+
+  beginupload = (upload) => {
+    console.log('upload', upload)
+    // - 如果开发者传入 fileInput, 在此回调之前不能修改 fileInput
+    // - 在此回调之后可以取消图片上传, 此回调会接收一个参数 `upload`, 调用 `upload.abort();` 来取消文件上传
+  }
   onConnect = (options) => {
     this.getHistoryMsgs()
     console.log('onConnect', options)
@@ -200,6 +332,7 @@ class Chatting extends React.Component {
     data.msgs[sessionId] = this.instance.mergeMsgs(data.msgs[sessionId], msgs)
 
     // 发送信息
+    console.log('msgs', msgs)
     let newMessages = []
     for (let i = msgs.length - 1; i >= 0; i--) {
       if (Number(msgs[i].from) === this.state.userInfo.uid) {
@@ -337,6 +470,9 @@ class Chatting extends React.Component {
 
     ImagePicker.showImagePicker(options, (response) => {
       console.log('Response', response)
+      if (response.data) {
+        this.onSendByType(response)
+      }
       // this.props.setModalLoading(true, '上传中')
       // let formData = new FormData()
       // formData.append('imgFile', {
@@ -413,7 +549,7 @@ class Chatting extends React.Component {
     ]
     return (
       <>
-        {this.state.messages.length === 0 && (
+        {/* {this.state.messages.length === 0 && (
           <View
             style={[
               StyleSheet.absoluteFill,
@@ -433,17 +569,19 @@ class Chatting extends React.Component {
               }}
             />
           </View>
-        )}
+        )} */}
         <GiftedChat
           messages={messages}
-          onSend={(messages) => this.onSend(messages)}
+          onSend={(messages) => {
+            this.onSend(messages)
+          }}
           showUserAvatar={true}
           locale={'zh-cn'}
           placeholder={'开始聊天吧'}
           renderSend={this.renderSend}
           renderBubble={this.renderBubble}
-          minInputToolbarHeight={70}
-          renderInputToolbar={this.renderInputToolbar}
+          // minInputToolbarHeight={70}
+          // renderInputToolbar={this.renderInputToolbar}
           user={{
             _id: uid,
             name: name,
@@ -470,7 +608,17 @@ class Chatting extends React.Component {
             )
           })}
         </View>
-
+        <View>
+          {/* <form  method="post" enctype="multipart/form-data">
+            <input
+              id="common_chat_opr_fileUpload"
+              type="file"
+              name="uploadFile"
+              style="display:none;position:absolute;left:0;top:0;width:0%;height:0%;opacity:0;"
+              accept="image/png,image/gif,image/jpg,image/jpeg"
+            />
+          </form> */}
+        </View>
         {/* <MessageList
           style={styles.messageList}
           initalData={messages}
