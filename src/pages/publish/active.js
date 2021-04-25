@@ -145,7 +145,7 @@ export default class PublishActivity extends React.Component {
         const {navigation} = this.props;
         const {ticketVoList} = this.state;
         navigation.navigate('LocalTickets', {
-            ticketVoList,
+            ticketVoList:ticketVoList,
             onSubmit: (data) => {
                 this.setState({
                     ticketVoList: data

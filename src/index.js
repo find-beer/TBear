@@ -61,6 +61,7 @@ import LocalAddTicket from "./pages/home/local_add_ticket";
 import LocalModifyTicket from "./pages/home/local_modify_ticket";
 
 import Chatting from "./pages/chat/Chatting"
+import GroupChat from "./pages/groupchat/group_chat"
 /**
  * App主堆栈
  */
@@ -108,8 +109,9 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '互动通知' }}    name='InteractiveList'    component={InteractiveList}/>
       <Stack.Screen options={{ ...defautOptions, title: '活动列表' }}    name='ActivityMsgList'    component={ActivityMsgList}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='LocalModifyTicket'  component={LocalModifyTicket}/>
-      <Stack.Screen options={{ ...defautOptions, title: '聊天' }}    name='Chatting'  component={Chatting}/>
+      <Stack.Screen options={{ ...defautOptions, title: '单聊' }}    name='Chatting'  component={Chatting}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='SettingP2p'  component={SettingP2p}/>
+      <Stack.Screen options={{ ...defautOptions, title: '群聊' }}    name='GroupChat'  component={GroupChat}/>
     </Stack.Navigator>
   )
 }

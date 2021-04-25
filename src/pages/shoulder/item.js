@@ -9,6 +9,7 @@ export default class Shoulder extends React.Component {
     super(props)
   }
   handleJoinTalk(){
+   
   }
   handlegoDetail(){
     this.props.navigation.navigate('ActivityDetail', { id: this.props.item.id})

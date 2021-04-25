@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React, { Fragment } from "react";
+import React, { Fragment } from 'react'
 import {
   Alert,
   SafeAreaView,
@@ -15,81 +15,90 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-} from "react-native";
-import Header from "../../../components/header/index";
-import { GetRequest } from "../../../utils/request";
-import { screenW } from "../../../constants";
-import { RichEditor } from "react-native-pell-rich-editor";
-import { connect, bindActions, bindState } from "./../../../redux";
+} from 'react-native'
+import Header from '../../../components/header/index'
+import { GetRequest } from '../../../utils/request'
+import { screenW } from '../../../constants'
+import { RichEditor } from 'react-native-pell-rich-editor'
+import { connect, bindActions, bindState } from './../../../redux'
 
 class ActivityDetail extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       id: props.route.params.id,
       data: {
-        activityTitle: "",
-        activityTime: "",
-        activityAddress: "",
+        activityTitle: '',
+        activityTime: '',
+        activityAddress: '',
         memberCount: 0,
-        content: "",
+        content: '',
         userType: 0,
       },
-    };
+    }
   }
 
   componentWillUnmount() {
-    this.props.navigation.goBack();
+    this.props.navigation.goBack()
   }
 
   requireDeviceData = async () => {
-    const { id } = this.state;
+    const { id } = this.state
 
-    const { success, data } = await this.props.get("activity/activity/detail", { id });
+    const { success, data } = await this.props.get('activity/activity/detail', {
+      id,
+    })
     console.log('data ------> ', data)
     if (success) {
-        this.setState({ data });
+      this.setState({ data }, () => {
+        console.log('data', this.state.data)
+      })
     }
-  };
-
-  componentDidMount() {
-    this.requireDeviceData();
   }
 
-  joinTalk = () => {};
+  componentDidMount() {
+    this.requireDeviceData()
+  }
 
-  confirmParticipate = () => {};
+  joinTalk = () => {
+    const { navigation } = this.props
+    navigation.navigate('GroupChat',{groupId:this.state.data.groupId})
+  }
+
+  confirmParticipate = () => {}
 
   immeJoin = () => {
-    const { data } = this.state;
+    const { data } = this.state
     if (data.userType === 0) {
-      Alert.alert("是否要报名？", "", [{
-          text: "取消",
-        },{
-          text: "确认",
-          style: "destructive",
+      Alert.alert('是否要报名？', '', [
+        {
+          text: '取消',
+        },
+        {
+          text: '确认',
+          style: 'destructive',
           onPress: () => {
-            this.confirmParticipate();
+            this.confirmParticipate()
           },
         },
-      ]);
+      ])
     } else {
-      this.props.navigation.navigate("TicketSelect", { data });
+      this.props.navigation.navigate('TicketSelect', { data })
     }
-  };
+  }
 
   render() {
-      console.log('this.state', this.state.data)
+    console.log('this.state', this.state.data)
     const {
       activityTitle,
       activityTime,
       activityAddress,
       memberCount,
       content,
-    } = this.state.data;
+    } = this.state.data
     return (
       <Fragment>
-        <SafeAreaView style={{ backgroundColor: "#fff" }} />
+        <SafeAreaView style={{ backgroundColor: '#fff' }} />
         <ScrollView>
           <View style={{ flex: 1 }}>
             <View style={styles.card}>
@@ -100,7 +109,7 @@ class ActivityDetail extends React.Component {
               <View style={styles.row}>
                 <Text style={styles.left}>【活动时间】</Text>
                 <Text style={styles.right}>
-                  {activityTime ? activityTime : "时间待定"}
+                  {activityTime ? activityTime : '时间待定'}
                 </Text>
               </View>
               <View style={styles.row}>
@@ -116,7 +125,7 @@ class ActivityDetail extends React.Component {
           </View>
         </ScrollView>
 
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity onPress={this.joinTalk}>
             <View style={styles.draft}>
               <Text style={styles.txt}>加入群聊</Text>
@@ -129,10 +138,10 @@ class ActivityDetail extends React.Component {
           </TouchableOpacity>
         </View>
       </Fragment>
-    );
+    )
   }
 }
-export default connect(bindState, bindActions)(ActivityDetail);
+export default connect(bindState, bindActions)(ActivityDetail)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -140,29 +149,29 @@ const styles = StyleSheet.create({
   draft: {
     height: 60,
     width: screenW / 2,
-    backgroundColor: "#cdcdcd",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#cdcdcd',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   publish: {
     height: 60,
     width: screenW / 2,
-    backgroundColor: "#564F5F",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#564F5F',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  txt: { color: "white", fontSize: 16 },
+  txt: { color: 'white', fontSize: 16 },
   left: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: 'bold',
+    color: '#333',
   },
   right: {
     fontSize: 16,
-    color: "#333",
+    color: '#333',
   },
   row: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 10,
   },
   card: {
@@ -173,11 +182,11 @@ const styles = StyleSheet.create({
     // width: screenW - 32,
     // marginLeft: 16,
     // borderRadius: 10,
-    backgroundColor: "white",
+    backgroundColor: 'white',
     height: 150,
     // marginTop: 12,
     // marginBottom: 12,
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingLeft: 16,
   },
-});
+})
