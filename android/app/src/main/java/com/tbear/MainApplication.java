@@ -7,7 +7,7 @@ import androidx.multidex.MultiDex;
 
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
-import cn.jystudio.local.barcode.recognizer.LocalBarcodeRecognizerPackage;
+//import cn.jystudio.local.barcode.recognizer.LocalBarcodeRecognizerPackage;
 //import cn.jiguang.imui.messagelist.ReactIMUIPackage;
 
 //import cn.jiguang.imui.chatinput.ReactIMUIPackage;
@@ -15,7 +15,7 @@ import cn.jystudio.local.barcode.recognizer.LocalBarcodeRecognizerPackage;
 //import com.reactnativecommunity.geolocation.GeolocationPackage;
 //import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.brentvatne.react.ReactVideoPackage;
-import cn.jystudio.local.barcode.recognizer.LocalBarcodeRecognizerPackage;
+//import cn.jystudio.local.barcode.recognizer.LocalBarcodeRecognizerPackage;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;

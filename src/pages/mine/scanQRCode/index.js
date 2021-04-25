@@ -10,7 +10,7 @@ import {
 import { RNCamera } from 'react-native-camera'
 import { BarcodeMask } from '@nartc/react-native-barcode-mask'
 import ImagePicker from 'react-native-image-picker'
-import LocalBarcodeRecognizer from 'react-native-local-barcode-recognizer'
+// import LocalBarcodeRecognizer from 'react-native-local-barcode-recognizer'
 import RNFS from 'react-native-fs'
 const camera = require('../../../assets/mine/camera-icon.png')
 import { scaleSize, scaleFont } from '../../../utils/scaleUtil'
@@ -31,50 +31,50 @@ export default class ScanQRCode extends Component {
       Alert.alert('无效二维码')
     }
   }
-  // 从相册中导入图片
-  fetchQR() {
-    const options = {
-      title: '拍照选择器',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-      cancelButtonTitle: '取消',
-      takePhotoButtonTitle: '点击拍照',
-      chooseFromLibraryButtonTitle: '从本地库相册导入',
-      // chooseWhichLibraryTitle: '从其他库打开',
-      tintColor: '#CB0000',
-    }
+  // // 从相册中导入图片
+  // fetchQR() {
+  //   const options = {
+  //     title: '拍照选择器',
+  //     storageOptions: {
+  //       skipBackup: true,
+  //       path: 'images',
+  //     },
+  //     cancelButtonTitle: '取消',
+  //     takePhotoButtonTitle: '点击拍照',
+  //     chooseFromLibraryButtonTitle: '从本地库相册导入',
+  //     // chooseWhichLibraryTitle: '从其他库打开',
+  //     tintColor: '#CB0000',
+  //   }
 
-    ImagePicker.showImagePicker(options, (response) => {
-      if (response.didCancel) {
-      } else if (response.error) {
-      } else if (response.customButton) {
-      } else {
-        // const source = { uri: response.uri }
-        this.imagesURLTobase64(response.path)
-      }
-    })
-  }
+  //   ImagePicker.showImagePicker(options, (response) => {
+  //     if (response.didCancel) {
+  //     } else if (response.error) {
+  //     } else if (response.customButton) {
+  //     } else {
+  //       // const source = { uri: response.uri }
+  //       this.imagesURLTobase64(response.path)
+  //     }
+  //   })
+  // }
   // 解析二维码
-  recoginze = async (source) => {
-    let result = await LocalBarcodeRecognizer.decode(
-      source.replace('data:image/jpeg;base64,', ''),
-      { codeTypes: ['ean13', 'qr'] }
-    )
-    // console.log('result', result)
-    if (result) {
-      this.props.navigation.navigate('StrangerInfo', { uid: result })
-    } else {
-      Alert.alert('无效二维码')
-    }
-  }
+  // recoginze = async (source) => {
+  //   let result = await LocalBarcodeRecognizer.decode(
+  //     source.replace('data:image/jpeg;base64,', ''),
+  //     { codeTypes: ['ean13', 'qr'] }
+  //   )
+  //   // console.log('result', result)
+  //   if (result) {
+  //     this.props.navigation.navigate('StrangerInfo', { uid: result })
+  //   } else {
+  //     Alert.alert('无效二维码')
+  //   }
+  // }
   // 图片本地路径转换为base64
-  imagesURLTobase64 = (url) => {
-    RNFS.readFile(url, 'base64').then((content) => {
-      this.recoginze(content)
-    })
-  }
+  // imagesURLTobase64 = (url) => {
+  //   RNFS.readFile(url, 'base64').then((content) => {
+  //     this.recoginze(content)
+  //   })
+  // }
 
   render() {
     return (
@@ -96,7 +96,7 @@ export default class ScanQRCode extends Component {
             edgeRadius={5}
           />
           {/* <Text >从相册中获取二维码</Text> */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => this.fetchQR()}
             style={styles.camera}
           >
@@ -104,7 +104,7 @@ export default class ScanQRCode extends Component {
               source={camera}
               style={{ width: '100%', height: '100%' }}
             ></Image>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </RNCamera>
       </View>
     )
