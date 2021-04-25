@@ -20,6 +20,7 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native'
 import DynamicTab from '../mine/index/dynamicTab'
 import UserInfoDetail from '../mine/index/userInfoDetail'
@@ -103,37 +104,44 @@ class StrangerInfo extends Component {
     })
   }
   // 关注
-  handleConcer = () => {
-    // GetRequest(`/userRelation/follow/${this.state.personalInfo.uid}`).then(
-    //   () => {
-    //     this.initPage()
-    //   }
-    // )
-    GetRequest(`/userRelation/follow/${this.state.personalInfo.uid}`).then(
-      (res) => {
-        if (res.code === 0) {
-          this.setState({})
-          var content = {
-            type: 1,
-            value: '关注你了'
-        };
-        content = JSON.stringify(content);
-          this.instance.sendCustomSysMsg({
-            scene: 'p2p',
-            to: this.state.personalInfo.uid,
-            content: content,
-            sendToOnlineUsersOnly: false,
-            apnsText: content,
-            antiSpamContent:true,
-            done: (error, msg) => {
-              console.log('发送' + msg.scene + '自定义系统通知' + (!error?'成功':'失败') + ', id=' + msg.idClient);
-              console.log(error);
-              console.log(msg);
-            },
-          })
+  handleConcer(follow) {
+    // console.log('follow', follow)
+    if (!follow) {
+      GetRequest(`/userRelation/follow/${this.state.personalInfo.uid}`).then(
+        (res) => {
+          if (res.code === 0) {
+            this.setState({})
+            var content = {
+              type: 1,
+              value: '关注你了',
+            }
+            content = JSON.stringify(content)
+            this.instance.sendCustomSysMsg({
+              scene: 'p2p',
+              to: this.state.personalInfo.uid,
+              content: content,
+              sendToOnlineUsersOnly: false,
+              apnsText: content,
+              antiSpamContent: true,
+              done: (error, msg) => {
+                console.log(
+                  '发送' +
+                    msg.scene +
+                    '自定义系统通知' +
+                    (!error ? '成功' : '失败') +
+                    ', id=' +
+                    msg.idClient
+                )
+                console.log(error)
+                console.log(msg)
+              },
+            })
+          }
         }
-      }
-    )
+      )
+    } else {
+      Alert.alert('已关注')
+    }
   }
   initNotify = () => {
     const { iminfo } = this.props.userInfo
@@ -184,7 +192,7 @@ class StrangerInfo extends Component {
                       {this.state.personalInfo.friend === true ||
                       this.props.userInfo.province ===
                         this.state.personalInfo.province ? (
-                        // 是好友获取同城就可以聊天
+                        // 1）普通用户 2）是好友或者同城
                         <TouchableOpacity onPress={this.handleChat}>
                           <View style={styles.centerStyle}>
                             <Image
@@ -195,7 +203,7 @@ class StrangerInfo extends Component {
                           </View>
                         </TouchableOpacity>
                       ) : (
-                        // 不是好友
+                        // 1）普通用户 2）不是好友或者同城
                         <TouchableOpacity onPress={this.handleAddFtiend}>
                           <View style={styles.centerStyle}>
                             <Image
@@ -224,22 +232,54 @@ class StrangerInfo extends Component {
                     !this.state.personalInfo.friend &&
                       this.state.personalInfo.userType === 1 &&
                       this.props.userInfo.userType === 0 && (
-                        <View style={styles.relativeBox}>
-                          <TouchableOpacity onPress={this.handleConcer}>
-                            <View style={styles.centerStyle}>
+                        <View style={styles.relativeBox2}>
+                          <TouchableOpacity
+                            onPress={() => {
+                              this.handleConcer(
+                                this.state.personalInfo.followed
+                              )
+                            }}
+                            style={styles.chatFollowBox}
+                          >
+                            <View style={styles.centerStyle2}>
                               <Image
                                 style={styles.operateIcon}
                                 source={imageUrl.relative}
                               />
                               <Text style={styles.operateText}>
-                                {this.state.personalInfo.isConcer
+                                {this.state.personalInfo.followed
                                   ? '已关注'
                                   : '关注'}
                               </Text>
                             </View>
                           </TouchableOpacity>
+                          <TouchableOpacity onPress={this.handleChat}>
+                            <View style={styles.centerStyle2}>
+                              <Image
+                                style={styles.operateIcon}
+                                source={imageUrl.relative}
+                              />
+                              <Text style={styles.operateText}>聊天</Text>
+                            </View>
+                          </TouchableOpacity>
                         </View>
                       )
+                  }
+                  {
+                    // 入驻用户进入普通用户(入驻用户)首页
+                    this.props.userInfo.userType === 1 && (
+                      <View>
+                        <TouchableOpacity onPress={this.handleChat}>
+                          <View style={styles.centerStyle2}>
+                            <Image
+                              style={styles.operateIcon}
+                              source={imageUrl.relative}
+                            />
+                            <Text style={styles.operateText}>聊天</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    )
                   }
                 </View>
               )}
@@ -348,11 +388,37 @@ const styles = StyleSheet.create({
     height: scaleSize(150),
     borderRadius: scaleSize(18),
   },
+  relativeBox2: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '80%',
+  },
+  chatFollowBox: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    // justifyContent: 'center',
+    alignItems: 'center',
+  },
   centerStyle: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  centerStyle2: {
+    display: 'flex',
+    flexDirection: 'row',
+    // justifyContent: 'space-between'
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: scaleSize(370),
+    height: scaleSize(150),
+    backgroundColor: '#f2f2f2',
+    borderRadius: scaleSize(18),
+    // marginRight: scaleSize(112),
   },
   operateIcon: {
     width: scaleSize(70),
