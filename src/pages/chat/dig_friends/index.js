@@ -46,7 +46,7 @@ class DigFriends extends React.Component {
   }
   componentDidMount() {
     // console.log('addFriendInstance', utils)
-    this.initNotify()
+    // this.initNotify()
     this.fetchPersonInfo()
     // removeStorage('friendSysMsgsData')
   }

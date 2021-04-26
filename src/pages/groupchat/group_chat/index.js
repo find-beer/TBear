@@ -11,13 +11,14 @@ import {
 } from 'react-native-gifted-chat'
 import { screenW } from '../../../constants'
 import { scaleSize, scaleFont } from '../../../utils/scaleUtil'
+import { connect, bindActions, bindState } from '../../../redux'
 const images = {
   uploadpictures: require('../../../assets/chat/uploadpictures.png'),
   sendvoice: require('../../../assets/chat/sendvoice.png'),
   sendmood: require('../../../assets/chat/sendmood.png'),
   addmore: require('../../../assets/chat/addmore.png'),
 }
-export default class GroupChat extends React.Component {
+class GroupChat extends React.Component {
   constructor(props) {
     super(props)
     console.log(
@@ -27,6 +28,7 @@ export default class GroupChat extends React.Component {
     this.state = {
       groupId: props.route.params.groupId, //群Id
       messages: [],
+      userInfo: this.props.userInfo,
     }
   }
 
@@ -211,6 +213,8 @@ export default class GroupChat extends React.Component {
     )
   }
 }
+
+export default connect(bindState, bindActions)(GroupChat)
 
 const styles = StyleSheet.create({
   sendWrap: {

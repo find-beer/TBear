@@ -61,7 +61,7 @@ class StrangerInfo extends Component {
   componentDidMount() {
     // console.log('this.props.route.params.uid', this.props.route.params.uid)
     this.fetchPersonInfo()
-    this.initNotify()
+    // this.initNotify()
   }
 
   handleChat = () => {
