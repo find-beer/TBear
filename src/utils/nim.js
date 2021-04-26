@@ -1,5 +1,7 @@
 const SDK = require('../../nim/NIM_Web_SDK_rn_v7.2.0.js')
-import { getStorage } from '../utils/storage'
+import { getStorage } from './storage'
+import { DeviceEventEmitter } from 'react-native'
+
 let instance
 let data = {}
 // 初始化sdk
@@ -56,7 +58,10 @@ onOfflineMsgs = (options) => {
 
 onMsg = (msg) => {
   pushMsg(msg)
+  console.log('onMsg=========================', msg)
   console.log('收到消息', msg.scene, msg.type, msg)
+   //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
+   DeviceEventEmitter.emit('fetchMessages', msg)
 }
 
 const sendMsgDone = (error, msg) => {
@@ -91,13 +96,10 @@ const pushMsg = (msgs) => {
   var sessionId = msgs[0].scene + '-' + msgs[0].to
   data.msgs = data.msgs || {}
   data.msgs[sessionId] = instance.mergeMsgs(data.msgs[sessionId], msgs)
-  console.log('data', data)
 }
 
-const nimDB = () => {
-  return data
-}
+const nimDB = data
 // 加好友
 
 // 群聊
-export { initNIM, sendMessage, nimDB }
+export { initNIM, sendMessage, nimDB, instance }

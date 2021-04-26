@@ -16,6 +16,7 @@ import {
   Alert,
   Button,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native'
 import React from 'react'
 import { GiftedChat, Bubble, Send } from 'react-native-gifted-chat'
@@ -31,7 +32,8 @@ import Item from '@ant-design/react-native/lib/list/ListItem'
 import ImagePicker from 'react-native-image-picker'
 import AsyncStorage from '@react-native-community/async-storage'
 import RNFS from 'react-native-fs'
-import * as nim from '../../utils/nimAddFriend'
+import * as nim from '../../utils/nim'
+import { result } from 'lodash'
 const data = {}
 
 const images = {
@@ -54,15 +56,31 @@ class Chatting extends React.Component {
       isLoadingEarlier: false,
       token: null,
       images: [],
-      roamingMsgs: nim.nimDB().msgs,
     }
   }
 
   componentDidMount() {
+    console.log('instance================>', nim.instance)
     this.fetchFrinedInfo()
     this.fetchMessages()
-    import('../../utils/nimAddFriend').then((nim) => {
-      console.log('nim==========================>', nim)
+    this.event = DeviceEventEmitter.addListener('fetchMessages', (msg) => {
+      //注册通知
+      console.log('DeviceEventEmitter==========================', msg)
+      // 接收信息
+      const { uid, name, headPicUrl } = this.state.frinedInfo
+      let acceptMessage = []
+      acceptMessage.push({
+        createdAt: getDayTime(msg.time),
+        text: msg.text,
+        user: {
+          _id: uid,
+          name: name,
+          avatar: headPicUrl,
+        },
+        _id: Math.round(Math.random() * 1000000),
+      })
+      // 更新UI信息
+      this.handleUpdateMessages(acceptMessage)
     })
 
     //   if (!this.state.messages.length) {
@@ -92,24 +110,10 @@ class Chatting extends React.Component {
     //     ],
     //   })
   }
-
-  componentDidUpdate(prevProps, prevState) {
-    console.log('componentDidUpdate================prevProps', prevProps)
-    console.log('componentDidUpdate================prevState', prevState)
+  componentWillUnmount() {
+    // 移除通知
+    this.event.remove()
   }
-  shouldComponentUpdate(nextProps, nextState) {
-    console.log('shouldComponentUpdate================nextProps', nextProps)
-    console.log('shouldComponentUpdate================nextState', nextState)
-    // if (nextState.roamingMsgs !== this.state.roamingMsgs) {
-
-    // }
-    return true
-  }
-  componentWillReceiveProps(nextProps, nextState) {
-    console.log('nextProps==========', nextProps)
-    console.log('nextState==========', nextState)
-  }
-
   // 获取好友信息
   fetchFrinedInfo = () => {
     GetRequest('user/userInfo', {
@@ -129,24 +133,22 @@ class Chatting extends React.Component {
 
   // 获取漫游信息
   fetchMessages() {
-    const roamingMsgs = nim.nimDB().msgs
-    // this.state({
-    //   roamingMsgs:roamingMsgs,
-    // },() => {
-    //   console.log('roamingMsgs',roamingMsgs)
-    // })
-    let messagesTypes = Object.values(roamingMsgs)
+    const roamingMsgs = nim.nimDB.msgs
+    let messagesTypes = {}
+    if (roamingMsgs !== null || roamingMsgs !== undefined) {
+      messagesTypes = Object.values(roamingMsgs)
+    }
+
     // 1) 合并数组
     let messages = []
     for (var i = 0; i < messagesTypes.length; i++) {
       messages.push(...messagesTypes[i])
     }
+
     // 2）时间排序
-    console.log('messages', messages)
     messages.sort((a, b) => {
       return b.time < a.time ? 1 : -1
     })
-    console.log('messages================sort', messages)
 
     // 3）展示聊天数据
     let newMessages = []
@@ -180,7 +182,6 @@ class Chatting extends React.Component {
       }
     }
 
-    console.log('newMessages================', newMessages)
     // 4）更新UI信息
     this.handleUpdateMessages(newMessages)
   }
@@ -218,39 +219,28 @@ class Chatting extends React.Component {
       _id: Math.round(Math.random() * 1000000),
     })
     // 更新UI信息
-    this.handleUpdateMessages(newMessages)
+    this.handleUpdateMessages(sendMessage)
   }
 
   // 根据文件类型发送
   onSendByType = (data) => {
-    // const { name, headPicUrl, uid } = this.state.userInfo
-    // const newImageMessages = []
-    // const dataURL = 'data:image/jpeg;base64,' + data.data
-    // newImageMessages.push({
-    //   createdAt: getDayTime(new Date()),
-    //   user: {
-    //     _id: uid,
-    //     name: name,
-    //     avatar: headPicUrl,
-    //   },
-    //   _id: Math.round(Math.random() * 1000000),
-    //   image: dataURL,
-    // })
-    // this.setState(
-    //   (previousState) => {
-    //     console.log('previousState', previousState)
-    //     return {
-    //       messages: GiftedChat.append(previousState.messages, newImageMessages),
-    //     }
-    //   },
-    //   () => {
-    //     console.log('messages2', this.state.messages)
-    //     setStorage('messages', JSON.stringify(this.state.messages))
-    //   }
-    // )
-    // 发送图片
-
+    // 发送图片UI展示
+    const { name, headPicUrl, uid } = this.state.userInfo
+    const newImageMessages = []
     const dataURL = 'data:image/jpeg;base64,' + data.data
+    newImageMessages.push({
+      createdAt: getDayTime(new Date()),
+      user: {
+        _id: uid,
+        name: name,
+        avatar: headPicUrl,
+      },
+      _id: Math.round(Math.random() * 1000000),
+      image: dataURL,
+    })
+    this.handleUpdateMessages(newImageMessages)
+
+    // 发送图片NIM
     var blob = SDK.NIM.blob.fromDataURL(dataURL)
     const fastPassParams = {
       w: data.width,
@@ -258,7 +248,7 @@ class Chatting extends React.Component {
       // md5: md5,
     }
     console.log('==================', JSON.stringify(fastPassParams))
-    this.instance.previewFile({
+    nim.instance.previewFile({
       type: 'image',
       blob: blob,
       fastPass: JSON.stringify(fastPassParams),
@@ -273,7 +263,7 @@ class Chatting extends React.Component {
         console.log('上传image' + (!error ? '成功' : '失败'))
         // show file to the user
         if (!error) {
-          var msg = this.instance.sendFile({
+          var msg = nim.instance.sendFile({
             scene: 'p2p',
             to: this.state.frinedInfo.uid,
             file: file,
@@ -312,7 +302,7 @@ class Chatting extends React.Component {
     //   console.log('fastPassParams', fastPassParams)
     //   // const formData = new FormData()
     //   // 需要上传的文件
-    //   this.instance.sendFile({
+    //   nim.instance.sendFile({
     //     scene: 'p2p',
     //     to: this.state.frinedInfo.uid,
     //     blob: blob,
@@ -351,111 +341,6 @@ class Chatting extends React.Component {
     console.log('upload', upload)
     // - 如果开发者传入 fileInput, 在此回调之前不能修改 fileInput
     // - 在此回调之后可以取消图片上传, 此回调会接收一个参数 `upload`, 调用 `upload.abort();` 来取消文件上传
-  }
-  onConnect = (options) => {
-    this.getHistoryMsgs()
-    console.log('onConnect', options)
-  }
-
-  onWillReconnect = (options) => {
-    console.log('onWillReconnect', options)
-  }
-
-  onDisconnect = (options) => {
-    console.log('onDisconnect', options)
-    Alert.alert(options['message'])
-  }
-
-  onError = (options) => {
-    console.log('onError', options)
-  }
-
-  onRoamingMsgs = (options) => {
-    this.pushMsg(options.msgs)
-    console.log('onRoamingMsgs', options)
-  }
-
-  onOfflineMsgs = (options) => {
-    this.pushMsg(options.msgs)
-    console.log('onOfflineMsgs', options)
-  }
-
-  onMsg = (options) => {
-    this.pushMsg(options)
-  }
-
-  pushMsg = (msgs) => {
-    if (!Array.isArray(msgs)) {
-      msgs = [msgs]
-    }
-    var sessionId = msgs[0].sessionId
-    data.msgs = data.msgs || {}
-    data.msgs[sessionId] = this.instance.mergeMsgs(data.msgs[sessionId], msgs)
-
-    // 发送信息
-    console.log('msgs', msgs)
-    let newMessages = []
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      if (Number(msgs[i].from) === this.state.userInfo.uid) {
-        const { name, headPicUrl, uid } = this.state.userInfo
-        newMessages.push({
-          createdAt: getDayTime(msgs[i].time),
-          text: msgs[i].text,
-          user: {
-            _id: uid,
-            name: name,
-            avatar: headPicUrl,
-          },
-          _id: Math.round(Math.random() * 1000000),
-        })
-      } else {
-        // 接收信息
-        const { uid, name, headPicUrl } = this.state.frinedInfo
-        newMessages.push({
-          createdAt: getDayTime(msgs[i].time),
-          text: msgs[i].text,
-          user: {
-            _id: uid,
-            name: name,
-            avatar: headPicUrl,
-          },
-          _id: Math.round(Math.random() * 1000000),
-        })
-      }
-    }
-
-    // 更新信息
-    this.setState(
-      (previousState) => {
-        console.log('previousState', previousState)
-        return {
-          messages: GiftedChat.append(previousState.messages, newMessages),
-        }
-      },
-      () => {
-        console.log('messages2', this.state.messages)
-        // setStorage('messages', JSON.stringify(this.state.messages))
-      }
-    )
-  }
-
-  initChat = () => {
-    const { iminfo } = this.props.userInfo
-    const { accid, token } = iminfo
-    this.instance = SDK.NIM.getInstance({
-      debug: true,
-      appKey: '67b35e65c41efd1097ef8504d5a88455',
-      token,
-      account: accid,
-      db: false, // 不使用数据库
-      onconnect: this.onConnect,
-      onwillreconnect: this.onWillReconnect,
-      ondisconnect: this.onDisconnect,
-      onerror: this.onError,
-      onroamingmsgs: this.onRoamingMsgs,
-      onofflinemsgs: this.onOfflineMsgs,
-      onmsg: this.onMsg,
-    })
   }
 
   renderSend = (props) => {
@@ -532,42 +417,8 @@ class Chatting extends React.Component {
     ImagePicker.showImagePicker(options, (response) => {
       console.log('Response', response)
       if (response.data) {
-        this.onSendByType(response)
+        // this.onSendByType(response)
       }
-      // this.props.setModalLoading(true, '上传中')
-      // let formData = new FormData()
-      // formData.append('imgFile', {
-      //   uri:
-      //     Platform.OS === 'ios'
-      //       ? 'data:image/jpeg;base64,' + response.data
-      //       : response.uri,
-      //   type: 'multipart/form-data',
-      //   name: 'trend' + new Date().getTime() + '.jpg',
-      // })
-      // fetch(apiProd.host + 'common/uploadImage', {
-      //   method: 'POST',
-      //   headers: currentHeader,
-      //   body: formData,
-      // })
-      //   .then((response) => {
-      //     return response.json()
-      //   })
-      //   .then((res) => {
-      //     imagesArr.push(res.data.url)
-      //     this.setState(
-      //       {
-      //         images: imagesArr,
-      //       },
-      //       () => {
-      //         this.props.setModalLoading(false)
-      //         // console.log('images', this.state.images)
-      //       }
-      //     )
-      //   })
-      //   .catch((e) => {
-      //     this.props.setModalLoading(false)
-      //     Toast.toast('上传失败，请重试')
-      //   })
     })
   }
 
@@ -669,34 +520,6 @@ class Chatting extends React.Component {
             )
           })}
         </View>
-        <View>
-          {/* <form  method="post" enctype="multipart/form-data">
-            <input
-              id="common_chat_opr_fileUpload"
-              type="file"
-              name="uploadFile"
-              style="display:none;position:absolute;left:0;top:0;width:0%;height:0%;opacity:0;"
-              accept="image/png,image/gif,image/jpg,image/jpeg"
-            />
-          </form> */}
-        </View>
-        {/* <MessageList
-          style={styles.messageList}
-          initalData={messages}
-          avatarSize={{ width: 40, height: 40 }}
-          sendBubbleTextSize={18}
-          sendBubbleTextColor="000000"
-        />
-        <SafeAreaView forceInset={{ top: false }}>
-          <ChatInput
-            style={{
-              width: window.width,
-              height: 50,
-            }}
-            menuViewH={220}
-            defaultToolHeight={50}
-          ></ChatInput>
-        </SafeAreaView> */}
       </>
     )
   }
@@ -705,54 +528,12 @@ class Chatting extends React.Component {
 export default connect(bindState, bindActions)(Chatting)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  messageList: {
-    // backgroundColor: 'red',
-    flex: 1,
-    marginTop: 0,
-    width: window.width,
-    margin: 0,
-  },
-  inputView: {
-    backgroundColor: 'green',
-    width: window.width,
-    height: 100,
-  },
-  btnStyle: {
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: '#3e83d7',
-    borderRadius: 8,
-    backgroundColor: '#3e83d7',
-  },
-  iconRow: {
-    flexDirection: 'row',
-    paddingHorizontal: screenW / 5 - 1,
-    flexWrap: 'wrap',
-    paddingVertical: 30,
-  },
-  actionCol: {
-    alignItems: 'center',
-    marginRight: screenW / 5,
-    height: 95,
-  },
-  iconTouch: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   registerBtnBox: {
-    // width: '100%',
     width: scaleSize(200),
-    // height: scaleSize(120),
     height: scaleSize(100),
     borderRadius: scaleSize(80),
     backgroundColor: '#564F5F',
-    // marginTop: scaleSize(70),
+    marginBottom: 4,
   },
   registerBtnText: {
     color: '#fff',
@@ -761,7 +542,6 @@ const styles = StyleSheet.create({
     fontSize: 19,
   },
   sendWrap: {
-    // height: 45,
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: scaleSize(30),
@@ -769,7 +549,6 @@ const styles = StyleSheet.create({
   icon: {
     width: scaleSize(64),
     height: scaleSize(64),
-    // marginRight: scaleSize(200),
   },
   uploadImage: {
     width: scaleSize(64),

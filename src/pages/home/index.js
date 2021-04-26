@@ -21,7 +21,7 @@ import Relations from './relations'
 import Trends from './trends'
 import NotLogin from './../../components/notLogin'
 import { getStorage, removeStorage } from './../../utils/storage'
-import * as nim from '../../utils/nimAddFriend'
+import * as nim from '../../utils/nim'
 import {
   addLocationListener,
   Geolocation,
