@@ -17,17 +17,8 @@ import {
   Button,
   ActivityIndicator,
 } from 'react-native'
-import { NimSession, NimFriend } from 'react-native-netease-im'
-// import { ChatInput, MessageList } from 'react-native-imui'
 import React from 'react'
-import {
-  GiftedChat,
-  Bubble,
-  Send,
-  IMessage,
-  Actions,
-  renderActions,
-} from 'react-native-gifted-chat'
+import { GiftedChat, Bubble, Send } from 'react-native-gifted-chat'
 import { screenW } from '../../constants'
 import { connect, bindActions, bindState } from './../../redux'
 import { GetRequest } from '../../utils/request'
@@ -39,8 +30,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 import Item from '@ant-design/react-native/lib/list/ListItem'
 import ImagePicker from 'react-native-image-picker'
 import AsyncStorage from '@react-native-community/async-storage'
-import md5 from '../../utils/md5'
 import RNFS from 'react-native-fs'
+import * as nim from '../../utils/nimAddFriend'
 const data = {}
 
 const images = {
@@ -63,58 +54,60 @@ class Chatting extends React.Component {
       isLoadingEarlier: false,
       token: null,
       images: [],
+      roamingMsgs: nim.nimDB().msgs,
     }
   }
 
   componentDidMount() {
-    console.log('componentDidMount', md5)
-    // 获取token
-    AsyncStorage.getItem('session', (error, result) => {
-      this.setState({ token: result })
-    })
-    this.initChat()
     this.fetchFrinedInfo()
-
-    getStorage('messages').then((res) => {
-      // console.log('============messages=============', res)
-      if (res) {
-        this.setState(
-          {
-            messages: eval(res),
-          },
-          () => {
-            // console.log('messagesStorage', this.state.messages)
-          }
-        )
-      }
+    this.fetchMessages()
+    import('../../utils/nimAddFriend').then((nim) => {
+      console.log('nim==========================>', nim)
     })
 
-    if (!this.state.messages.length) {
-      this.setState({
-        messages: [
-          {
-            _id: Math.round(Math.random() * 1000000),
-            text: '0 message',
-            createdAt: new Date(),
-            system: true,
-          },
-        ],
-      })
-    }
-    this.setState({
-      messages: [
-        // {
-        //   _id: 1,
-        //   text: 'Hello developer',
-        //   createdAt: new Date(Date.UTC(2016, 7, 30, 17, 20, 0)),
-        //   user: {
-        //     _id: 102,
-        //     name: 'React Native',
-        //     avatar: 'https://facebook.github.io/react/img/logo_og.png',
-        //   },
-        // },
-      ],
-    })
+    //   if (!this.state.messages.length) {
+    //     this.setState({
+    //       messages: [
+    //         {
+    //           _id: Math.round(Math.random() * 1000000),
+    //           text: '0 message',
+    //           createdAt: new Date(),
+    //           system: true,
+    //         },
+    //       ],
+    //     })
+    //   }
+    //   this.setState({
+    //     messages: [
+    //       {
+    //         _id: 1,
+    //         text: 'Hello developer',
+    //         createdAt: new Date(Date.UTC(2016, 7, 30, 17, 20, 0)),
+    //         user: {
+    //           _id: 102,
+    //           name: 'React Native',
+    //           avatar: 'https://facebook.github.io/react/img/logo_og.png',
+    //         },
+    //       },
+    //     ],
+    //   })
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    console.log('componentDidUpdate================prevProps', prevProps)
+    console.log('componentDidUpdate================prevState', prevState)
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('shouldComponentUpdate================nextProps', nextProps)
+    console.log('shouldComponentUpdate================nextState', nextState)
+    // if (nextState.roamingMsgs !== this.state.roamingMsgs) {
+
+    // }
+    return true
+  }
+  componentWillReceiveProps(nextProps, nextState) {
+    console.log('nextProps==========', nextProps)
+    console.log('nextState==========', nextState)
   }
 
   // 获取好友信息
@@ -134,21 +127,100 @@ class Chatting extends React.Component {
     })
   }
 
+  // 获取漫游信息
+  fetchMessages() {
+    const roamingMsgs = nim.nimDB().msgs
+    // this.state({
+    //   roamingMsgs:roamingMsgs,
+    // },() => {
+    //   console.log('roamingMsgs',roamingMsgs)
+    // })
+    let messagesTypes = Object.values(roamingMsgs)
+    // 1) 合并数组
+    let messages = []
+    for (var i = 0; i < messagesTypes.length; i++) {
+      messages.push(...messagesTypes[i])
+    }
+    // 2）时间排序
+    console.log('messages', messages)
+    messages.sort((a, b) => {
+      return b.time < a.time ? 1 : -1
+    })
+    console.log('messages================sort', messages)
+
+    // 3）展示聊天数据
+    let newMessages = []
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (Number(messages[i].from) === this.state.userInfo.uid) {
+        // 发送信息
+        const { name, headPicUrl, uid } = this.state.userInfo
+        newMessages.push({
+          createdAt: getDayTime(messages[i].time),
+          text: messages[i].text,
+          user: {
+            _id: uid,
+            name: name,
+            avatar: headPicUrl,
+          },
+          _id: Math.round(Math.random() * 1000000),
+        })
+      } else {
+        // 接收信息
+        const { uid, name, headPicUrl } = this.state.frinedInfo
+        newMessages.push({
+          createdAt: getDayTime(messages[i].time),
+          text: messages[i].text,
+          user: {
+            _id: uid,
+            name: name,
+            avatar: headPicUrl,
+          },
+          _id: Math.round(Math.random() * 1000000),
+        })
+      }
+    }
+
+    console.log('newMessages================', newMessages)
+    // 4）更新UI信息
+    this.handleUpdateMessages(newMessages)
+  }
+
+  handleUpdateMessages = (newMessages) => {
+    this.setState(
+      (previousState) => {
+        console.log('previousState', previousState)
+        return {
+          messages: GiftedChat.append(previousState.messages, newMessages),
+        }
+      },
+      () => {
+        console.log('messages2', this.state.messages)
+      }
+    )
+  }
+
   // 发送文本信息
   onSend = (newMessages = []) => {
     console.log('newMessages', newMessages)
-    // 发送信息
-    this.instance.sendText({
-      scene: 'p2p',
-      to: this.state.frinedInfo.uid,
+    // 发送nim信息
+    nim.sendMessage(this.state.frinedInfo.uid, newMessages[0].text)
+    // 发送UI信息
+    const { name, headPicUrl, uid } = this.state.userInfo
+    let sendMessage = []
+    sendMessage.push({
+      createdAt: getDayTime(new Date()),
       text: newMessages[0].text,
-      done: (error, msg) => {
-        if (!error) {
-          this.pushMsg(msg)
-        }
+      user: {
+        _id: uid,
+        name: name,
+        avatar: headPicUrl,
       },
+      _id: Math.round(Math.random() * 1000000),
     })
+    // 更新UI信息
+    this.handleUpdateMessages(newMessages)
   }
+
   // 根据文件类型发送
   onSendByType = (data) => {
     // const { name, headPicUrl, uid } = this.state.userInfo
@@ -312,17 +384,6 @@ class Chatting extends React.Component {
     this.pushMsg(options)
   }
 
-  // getHistoryMsgs = () => {
-  //   this.instance.getLocalMsgs({
-  //     sessionId: 'p2p-' + this.state.friendUid,
-  //     limit: 100,
-  //     done: this.getLocalMsgsDone,
-  //   })
-  // }
-  // getLocalMsgsDone = (error, obj) => {
-  //   console.log('获取本地消息' + (!error ? '成功' : '失败'), error, obj)
-  // }
-
   pushMsg = (msgs) => {
     if (!Array.isArray(msgs)) {
       msgs = [msgs]
@@ -373,7 +434,7 @@ class Chatting extends React.Component {
       },
       () => {
         console.log('messages2', this.state.messages)
-        setStorage('messages', JSON.stringify(this.state.messages))
+        // setStorage('messages', JSON.stringify(this.state.messages))
       }
     )
   }

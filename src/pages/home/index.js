@@ -48,56 +48,14 @@ class Home extends React.Component {
     removeStorage('messages')
     this.props.setModalLoading(false)
     this.initUserInfo()
-    this.initIM()
-    // nim.initIM()
   }
   initUserInfo = async () => {
     const userInfo = await getStorage('userInfo')
     if (userInfo.uid) {
       this.props.setUserInfo(userInfo)
+      // 初始化SDK
+      nim.initNIM()
     }
-  }
-
-  initIM = async () => {
-    console.log('initIM')
-    const { iminfo } = this.props.userInfo
-    if (iminfo) {
-      const { accid, token } = iminfo
-      // nim.initIM(accid, token)
-      this.instance = SDK.NIM.getInstance({
-        debug: true,
-        appKey: '67b35e65c41efd1097ef8504d5a88455',
-        token,
-        account: accid,
-        db: false, // 不使用数据库
-        onconnect: this.onConnect,
-        onwillreconnect: this.onWillReconnect,
-        ondisconnect: this.onDisconnect,
-        onerror: this.onError,
-        onroamingmsgs: this.onRoamingMsgs,
-        onofflinemsgs: this.onOfflineMsgs,
-        onmsg: this.onMsg,
-      })
-    }
-  }
-
-  onOfflineMsgs = (options) => {}
-
-  onMsg = (options) => {
-    console.log('接收到的信息', options)
-    Alert.alert('接收到的信息:' + options)
-  }
-
-  onConnect = () => {
-    console.log('onConnect')
-    this.instance.sendText({
-      scene: 'p2p',
-      to: '102',
-      text: 'hello',
-      done: (response) => {
-        // console.log('response102', response)
-      },
-    })
   }
 
   loadLocation = async () => {
