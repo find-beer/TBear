@@ -35,6 +35,7 @@ import QrCode from "./pages/mine/qrCode";
 import ScanQRCode from "./pages/mine/scanQRCode"
 import Store from "./pages/mine/store";
 import StoreList from "./pages/mine/storeList";
+import StoreListJoin from './pages/mine/storeListJoin'
 import EditInfo from "./pages/mine/editInfo";
 import Setting from "./pages/mine/setting";
 import OrderList from "./pages/mine/orderList";
@@ -91,7 +92,8 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '订单列表' }}    name='OrderList'          component={OrderList}/>
       <Stack.Screen options={{ ...defautOptions, title: '关系链' }}    name='Relations'          component={Relations}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='EditDraft'          component={EditDraft}/>
-      <Stack.Screen options={{ ...defautOptions, title: '' }}    name='StoreList'          component={StoreList}/>
+      <Stack.Screen options={{ ...defautOptions, title: '我参与的' }}    name='StoreList'          component={StoreList}/>
+      <Stack.Screen options={{ ...defautOptions, title: '我发布的' }}    name='StoreListJoin'          component={StoreListJoin}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='AddTicket'          component={AddTicket}/>
       <Stack.Screen options={{ ...defautOptions, title: '挖好友' }}    name='DigFriend'          component={DigFriend}/>
       <Stack.Screen options={{ ...defautOptions, title: '好友列表' }}    name='FriendsList'        component={FriendsList}/>

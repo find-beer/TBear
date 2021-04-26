@@ -14,11 +14,11 @@ target 'TBear' do
 
   pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
-  pod 'RNReactNativeLocalBarcodeRecognizer', :path => '../node_modules/react-native-local-barcode-recognizer'
+  # pod 'RNReactNativeLocalBarcodeRecognizer', :path => '../node_modules/react-native-local-barcode-recognizer'
 
   pod 'react-native-video', :path => '../node_modules/react-native-video'
 
-  pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
+  # pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
 
   target 'TBearTests' do
     inherit! :complete
@@ -30,9 +30,9 @@ target 'TBear' do
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable these next few lines.
   use_flipper!
-  post_install do |installer|
-    flipper_post_install(installer)
-  end
+  # post_install do |installer|
+  #   flipper_post_install(installer)
+  # end
 end
 
 target 'TBear-tvOS' do
@@ -41,5 +41,14 @@ target 'TBear-tvOS' do
   target 'TBear-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
+  end
+end
+
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+      end
   end
 end

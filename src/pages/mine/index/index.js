@@ -51,7 +51,10 @@ class Mine extends Component {
   }
 
   componentDidMount() {
-    console.log('this.state.userInfo', this.state.userInfo)
+    this.initInfo()
+    EventBus.on('REFRESHMINE', () => {
+      this.initInfo()
+    })
   }
 
   initInfo() {
@@ -61,11 +64,6 @@ class Mine extends Component {
       })
     })
   }
-  componentDidMount() {
-    EventBus.on('REFRESHMINE', () => {
-      this.initInfo()
-    })
-  }
   handleGoCode() {
     this.props.navigation.navigate('QrCode')
   }
@@ -73,7 +71,7 @@ class Mine extends Component {
     this.props.navigation.navigate('Store')
   }
   handleGoEdit() {
-    this.props.navigation.navigate('EditInfo', this.state.userInfo)
+    this.props.navigation.navigate('EditInfo', this.state.personalInfo)
   }
   handleGoConfig() {
     this.props.navigation.navigate('Setting')
@@ -81,7 +79,8 @@ class Mine extends Component {
   render() {
     const { userInfo } = this.state
     return (
-      <View style={styles.container}>
+      <Provider>
+        <View style={styles.container}>
         <ScrollView>
           <ImageBackground
             style={styles.persionalTab}
@@ -100,7 +99,7 @@ class Mine extends Component {
                   <Text style={styles.configFont}>设置</Text>
                 </View>
               </TouchableOpacity>
-              <UserInfoDetail userInfo={userInfo} />
+              <UserInfoDetail userInfo={this.state.personalInfo} />
               <View style={styles.operationBox}>
                 <TouchableOpacity onPress={() => this.handleGoCode()}>
                   <View style={styles.operationBtn}>
@@ -130,6 +129,7 @@ class Mine extends Component {
           <DynamicTab personalInfo={this.state.personalInfo} {...this.props} />
         </ScrollView>
       </View>
+      </Provider>
     )
   }
 }

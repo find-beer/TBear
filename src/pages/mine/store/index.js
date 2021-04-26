@@ -13,7 +13,7 @@ export default class Store extends Component {
     }
   }
     handleGoPublish(){
-        this.props.navigation.navigate('StoreList',{type:'publish'})
+        this.props.navigation.navigate('StoreListJoin',{type:'publish'})
     }
     handleGoJoin(){
         this.props.navigation.navigate('StoreList',{type:'join'})

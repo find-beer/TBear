@@ -45,7 +45,7 @@ export default class OrderList extends Component {
       pageSize:500
     }).then(res => {
       this.setState({
-        orderList:res.data
+        orderList:res.data || []
       })
     })
   }
@@ -54,7 +54,6 @@ export default class OrderList extends Component {
       <Fragment>
         <SafeAreaView style={{flex: 0, backgroundColor: 'white'}}/>
         <SafeAreaView style={styles.orderListWrap}>
-        <Header {...this.props} title="报名详情" left={null} />
           <View style={styles.container}>
             {/* {
               this.state.isPublish

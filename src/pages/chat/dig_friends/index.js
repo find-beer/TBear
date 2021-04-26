@@ -302,7 +302,6 @@ class DigFriends extends React.Component {
         <Fragment>
           <SafeAreaView style={{ flex: 0, backgroundColor: 'white' }} />
           <SafeAreaView style={styles.container}>
-            <Header {...this.props} title="挖好友" left={null} />
             <View style={styles.operate_box}>
               <View style={styles.search_wrapper}>
                 <View style={styles.search_box}>

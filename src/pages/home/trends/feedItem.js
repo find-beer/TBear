@@ -1,15 +1,15 @@
 import React, { Component, Fragment } from 'react'
-import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native'
+import { StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native'
 const imageUrl = {
   like: require('../../../assets/home/like.png'),
   unlike: require('../../../assets/home/unlike.png'),
   comment: require('../../../assets/mine/comment.png'),
   share: require('../../../assets/mine/share-icon.png'),
-  more: require('../../../assets/mine/more.png'),
+  delete: require('../../../assets/mine/delete.png'),
 }
 import { Modal } from '@ant-design/react-native'
 import { connect, bindActions, bindState } from './../../../redux'
-import Toast from './../../../utils/toast'
+import { Toast } from '@ant-design/react-native'
 import { get } from 'lodash'
 import { scaleSize, scaleFont } from '../../../utils/scaleUtil'
 import { getDate } from '../../../utils/date'
@@ -17,6 +17,7 @@ import Button from './../../../components/button'
 import Video from 'react-native-video'
 import { screenW } from '../../../constants'
 import ImageViewer from 'react-native-image-viewing'
+import EventBus from '../../../utils/EventBus';
 const defaultAvatar =
   'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1817066819,1530157012&fm=11&gp=0.jpg'
 class FeedItem extends Component {
@@ -45,7 +46,6 @@ class FeedItem extends Component {
     this.props.navigation.navigate('VideoDisplay', { url: item })
   }
   handleLike = async () => {
-    console.log('点赞了')
     try {
       const payload = {
         infoId: this.state.data.id,
@@ -53,7 +53,6 @@ class FeedItem extends Component {
         state: this.state.data.like ? 0 : 1,
       }
       const result = await this.props.post('like/operate', payload)
-      console.log('result', result)
       if (this.state.data.like) {
         this.setState({
           data: {
@@ -73,29 +72,21 @@ class FeedItem extends Component {
       }
     } catch (error) {}
   }
-  handleDelete() {
-    Modal.alert('提示', '确认删除该动态么', [
-      {
-        text: '取消',
-        onPress: () => {},
-        style: 'cancel',
-      },
-      { text: '删除', onPress: () => this.delete() },
-    ])
-  }
   delete = async () => {
     try {
       const result = await this.props.post('/feed/delete', {
         id: this.state.data.id,
       })
       if (result.code === 0) {
-        Toast.toast('删除成功')
+        Toast.success('删除成功')
+        EventBus.post('REFRESH_TREND')
       } else {
-        Toast.toast('删除失败，请重试')
+        Toast.fail('删除失败，请重试')
       }
     } catch (e) {
-      Toast.toast('删除失败，请重试')
+      Toast.fail('删除失败，请重试')
     }
+    
   }
   render() {
     const { visible, currentIndex } = this.state
@@ -137,8 +128,8 @@ class FeedItem extends Component {
             {
               // 个人中心页面，且动态id是本人id,才展示删除按钮
               this.state.isMinePage && this.state.loginUid !== userVO.uid ? (
-                <TouchableOpacity onPress={() => this.handleDelete()}>
-                  <Image source={imageUrl.more} style={styles.operateBtn} />
+                <TouchableOpacity onPress={this.delete}>
+                  <Image source={imageUrl.delete} style={styles.operateBtn} />
                 </TouchableOpacity>
               ) : null
             }
@@ -177,20 +168,19 @@ class FeedItem extends Component {
                     key={index + 'info2'}
                     index={index}
                   >
-                    <Video
+                    {/* <Video
                       source={{ uri: item.replace('https', 'http') }}
                       style={[
                         styles.dynamicImg,
                         (index + 1) % 3 && styles.picMargin,
                       ]}
                       muted={true}
-                    />
+                    /> */}
                   </TouchableOpacity>
                 )
               })}
             </View>
-            {/* <View style={styles.imgBox}>
-           
+            {/* <View style={styles.imgBox}
           </View> */}
           </View>
           <View style={styles.operationBox}>
@@ -234,7 +224,6 @@ const styles = StyleSheet.create({
   operateBtn: {
     width: scaleSize(100),
     height: scaleSize(30),
-    backgroundColor: 'red',
   },
   dynamicItemWrap: {
     backgroundColor: '#fff',

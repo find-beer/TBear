@@ -24,9 +24,11 @@ export default class DynamicTab extends Component {
       },
     }
   }
-  // componentDidMount() {
-
-  // }
+  componentDidMount() {
+    EventBus.on('REFRESHLIST',() => {
+      requestCurrent()
+    })
+  }
   changeTab(name) {
     this.setState({
       currentTab: name,
@@ -70,9 +72,6 @@ export default class DynamicTab extends Component {
     this.state.uid ? this.requestStranger() : this.requestCurrent()
     EventBus.on('REFRESH_TREND', () => {
       this.state.uid ? this.requestStranger() : this.requestCurrent()
-    })
-    EventBus.on('REFRESHMINE', () => {
-      this.initInfo()
     })
     AsyncStorage.getItem('userInfo', (error, result) => {
       // console.log('result',result)

@@ -21,6 +21,7 @@ import {
   List,
   TextareaItem,
   DatePicker,
+  Toast
 } from "@ant-design/react-native";
 import { GetRequest, PutRequest, PostRequest } from "../../../utils/request";
 import { xor } from "lodash";
@@ -161,11 +162,11 @@ class EditInfo extends Component {
     return new Promise((resolve, reject) => {
       let oldObj = that.props.route.params;
       let newObj = that.state.editForm;
+      console.log(oldObj,newObj)
       if (
         oldObj.birthdayTimeStamp === newObj.birthdayTimeStamp &&
         oldObj.name === newObj.name &&
-        oldObj.adName === newObj.adName &&
-        xor(oldObj.hobbyTagNameList, newObj.hobbyTagNameList).length === 0
+        oldObj.adName === newObj.adName
       ) {
         reject();
       } else {
@@ -184,8 +185,8 @@ class EditInfo extends Component {
       loginToken: this.state.editForm.token,
       locationStr: `${this.state.editForm.province}-${this.state.editForm.cityName}-${this.state.editForm.adName}`,
     }).then((res) => {
+      Toast.success('修改成功')
       EventBus.post("REFRESHMINE");
-      this.props.navigation.navigate("Mine");
     });
   }
   render() {
