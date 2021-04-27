@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  DeviceEventEmitter,
 } from 'react-native'
 import { Provider, Toast } from '@ant-design/react-native'
 import { GetRequest } from '../../../utils/request'
@@ -17,7 +18,7 @@ const defaultHeader = require('../../../assets/mine/avatar.jpeg')
 const arrowIcon = require('../../../assets/mine/arrow_right.png')
 import { connect, bindActions, bindState } from '../../../redux'
 import { setStorage, getStorage, removeStorage } from '../../../utils/storage'
-// import * as utils from '../../../utils/nimAddFriend'
+import * as nim from '../../../utils/nim'
 const SDK = require('../../../../nim/NIM_Web_SDK_rn_v7.2.0')
 var data = {}
 class DigFriends extends React.Component {
@@ -47,8 +48,15 @@ class DigFriends extends React.Component {
   componentDidMount() {
     // console.log('addFriendInstance', utils)
     // this.initNotify()
-    this.fetchPersonInfo()
+    // this.fetchPersonInfo()
     // removeStorage('friendSysMsgsData')
+    this.event = DeviceEventEmitter.addListener('fetchSysMsg', (sysMsg) => {
+
+    }
+
+  }
+  componentWillUnmount() {
+    this.event.remove()
   }
 
   fetchPersonInfo = () => {
@@ -101,10 +109,10 @@ class DigFriends extends React.Component {
       return
     }
   }
-
+  // nim申请加好友
   handleAddFriend = () => {
     if (this.state.searchResult.uid) {
-      this.instance.applyFriend({
+      nim.instance.applyFriend({
         account: this.state.searchResult.uid,
         ps: 'ps',
         done: (error, obj) => {
@@ -238,7 +246,7 @@ class DigFriends extends React.Component {
   }
 
   onAddFriend = (friend) => {
-    data.friends = this.instance.mergeFriends(data.friends, friend)
+    data.friends = nim.instance.mergeFriends(data.friends, friend)
     this.serverAddFriend()
     this.refreshFriendsUI()
   }

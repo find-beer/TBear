@@ -24,6 +24,13 @@ const initNIM = async (account, token) => {
       onroamingmsgs: onRoamingMsgs,
       onofflinemsgs: onOfflineMsgs,
       onmsg: onMsg,
+      onfriends: onFriends,
+      onsyncfriendaction: onSyncFriendAction,
+      onofflinesysmsgs: onOfflineSysMsgs,
+      onsysmsg: onSysMsg,
+      onupdatesysmsg: onUpdateSysMsg,
+      onsysmsgunread: onSysMsgUnread,
+      onupdatesysmsgunread:onUpdateSysMsgUnread,
     })
   }
   console.log('db============================', instance.support.db)
@@ -89,7 +96,6 @@ const sendMessage = (account, text) => {
 }
 
 const pushMsg = (msgs) => {
-  console.log('pushMsg===========================', msgs)
   if (!Array.isArray(msgs)) {
     msgs = [msgs]
   }
@@ -99,7 +105,102 @@ const pushMsg = (msgs) => {
 }
 
 const nimDB = data
+
+
 // 加好友
+const onOfflineSysMsgs = (sysMsgs) => {
+  console.log('收到离线系统通知', sysMsgs)
+  pushSysMsgs(sysMsgs)
+}
+const onSysMsg = (sysMsg) => {
+  console.log('收到系统通知', sysMsg)
+  pushSysMsgs(sysMsg)
+   //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
+   DeviceEventEmitter.emit('fetchSysMsg', sysMsg)
+}
+const onUpdateSysMsg = (sysMsg) => {
+  pushSysMsgs(sysMsg)
+}
+
+pushSysMsgs = (sysMsgs) => {
+  data.sysMsgs = instance.mergeSysMsgs(data.sysMsgs, sysMsgs)
+}
+
+const onSysMsgUnread = (obj) => {
+  console.log('收到系统通知未读数', obj)
+  data.sysMsgUnread = obj
+  refreshSysMsgsUI()
+}
+const onUpdateSysMsgUnread = (obj) => {
+  console.log('系统通知未读数更新了', obj)
+  data.sysMsgUnread = obj
+  refreshSysMsgsUI()
+}
+const refreshSysMsgsUI = () => {
+  // 刷新界面
+}
+const onFriends = (friends) => {
+  console.log('收到好友列表', friends)
+  data.friends = instance.mergeFriends(data.friends, friends)
+  data.friends = instance.cutFriends(data.friends, friends.invalid)
+  refreshFriendsUI()
+}
+
+const onSyncFriendAction = (obj) => {
+  console.log(obj)
+  switch (obj.type) {
+    case 'addFriend':
+      console.log(
+        '你在其它端直接加了一个好友' + obj.account + ', 附言' + obj.ps
+      )
+      onAddFriend(obj.friend)
+      break
+    case 'applyFriend':
+      console.log(
+        '你在其它端申请加了一个好友' + obj.account + ', 附言' + obj.ps
+      )
+      break
+    case 'passFriendApply':
+      console.log(
+        '你在其它端通过了一个好友申请' + obj.account + ', 附言' + obj.ps
+      )
+      onAddFriend(obj.friend)
+      break
+    case 'rejectFriendApply':
+      console.log(
+        '你在其它端拒绝了一个好友申请' + obj.account + ', 附言' + obj.ps
+      )
+      break
+    case 'deleteFriend':
+      console.log('你在其它端删了一个好友' + obj.account)
+      onDeleteFriend(obj.account)
+      break
+    case 'updateFriend':
+      console.log('你在其它端更新了一个好友', obj.friend)
+      onUpdateFriend(obj.friend)
+      break
+  }
+}
+
+const onAddFriend = (friend) => {
+  data.friends = instance.mergeFriends(data.friends, friend)
+  serverAddFriend()
+  refreshFriendsUI()
+}
+
+const onDeleteFriend = (account) => {
+  data.friends = instance.cutFriendsByAccounts(data.friends, account)
+  refreshFriendsUI()
+}
+
+const onUpdateFriend = (friend) => {
+  data.friends = instance.mergeFriends(data.friends, friend)
+  refreshFriendsUI()
+}
+
+const refreshFriendsUI = () => {
+  // 刷新界面
+}
 
 // 群聊
 export { initNIM, sendMessage, nimDB, instance }
