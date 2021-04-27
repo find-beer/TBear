@@ -50,10 +50,7 @@ class DigFriends extends React.Component {
     // this.initNotify()
     // this.fetchPersonInfo()
     // removeStorage('friendSysMsgsData')
-    this.event = DeviceEventEmitter.addListener('fetchSysMsg', (sysMsg) => {
-
-    }
-
+    this.event = DeviceEventEmitter.addListener('fetchSysMsg', (sysMsg) => {})
   }
   componentWillUnmount() {
     this.event.remove()
