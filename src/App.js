@@ -63,7 +63,6 @@ export default class App extends React.Component {
           onPress={(which) => {}}
         />
       </View>
-     
     );
   }
 }

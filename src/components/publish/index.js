@@ -76,14 +76,15 @@ class Publish extends Component{
    */
   toPublish = (type) => {
     this.hideModal()
-    const { uid } = this.props.userInfo
+    const { uid, userType } = this.props.userInfo
+    console.log(this.props.userInfo)
     if (!uid) {
       this.state.navigation.navigate('Auth')
     } else {
       if (type === 'active') {
-        this.state.navigation.navigate('PublishActive', { userType: 1 })
+        this.state.navigation.navigate('PublishActive', { userType })
       } else {
-        this.state.navigation.navigate('PublishTrend', { userType: 1 })
+        this.state.navigation.navigate('PublishTrend', { userType })
       }
     }
   }

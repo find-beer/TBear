@@ -155,7 +155,8 @@ export default class PublishActivity extends React.Component {
     }
 
     selectType = () => {
-        global.selectItemsDialog.show()
+        console.log(global)
+        // global.selectItemsDialog.show()
     }
 
     hideDatePicker = () => {

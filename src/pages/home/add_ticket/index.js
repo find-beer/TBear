@@ -123,7 +123,6 @@ export default class AddTicket extends React.Component {
     render() {
         return <Fragment>
             <SafeAreaView style={{backgroundColor: 'white'}}/>
-            <Header {...this.props} title={'新增票种'}/>
             <View style={{flex: 1}}>
                 <SettingItem title={'票种名称'} subType={'input'} inputHint={'请填写'}
                              reflectText={(title) => {

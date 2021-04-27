@@ -223,7 +223,6 @@ class Tickets extends React.Component {
         const {ticketVoList} = this.state;
         return <Fragment>
             <SafeAreaView style={{backgroundColor: 'white'}}/>
-            <Header {...this.props} title={'票种'}/>
             <View style={{flex: 1}}>
                 <FlatList
                     data={ticketVoList}

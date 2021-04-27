@@ -84,7 +84,7 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '我的二维码' }}  name='QrCode'             component={QrCode}/>
       <Stack.Screen options={{ ...defautOptions, title: '扫一扫' }}  name='ScanQRCode'             component={ScanQRCode}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='Splash'             component={Splash}/>
-      <Stack.Screen options={{ ...defautOptions, title: '票' }}      name='Tickets'            component={Tickets}/>
+      <Stack.Screen options={{ ...defautOptions, title: '票种' }}      name='Tickets'            component={Tickets}/>
       <Stack.Screen options={{ ...defautOptions, title: '设置' }}    name='Setting'            component={Setting}/>
       <Stack.Screen options={{ ...defautOptions, title: '我的关注' }}    name='MyFollow'           component={MyFollow}/>
       <Stack.Screen options={{ ...defautOptions, title: '我的粉丝' }}    name='FansList'           component={FansList}/>
@@ -94,10 +94,10 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='EditDraft'          component={EditDraft}/>
       <Stack.Screen options={{ ...defautOptions, title: '我参与的' }}    name='StoreList'          component={StoreList}/>
       <Stack.Screen options={{ ...defautOptions, title: '我发布的' }}    name='StoreListJoin'          component={StoreListJoin}/>
-      <Stack.Screen options={{ ...defautOptions, title: '' }}    name='AddTicket'          component={AddTicket}/>
+      <Stack.Screen options={{ ...defautOptions, title: '新增票种' }}    name='AddTicket'          component={AddTicket}/>
       <Stack.Screen options={{ ...defautOptions, title: '挖好友' }}    name='DigFriend'          component={DigFriend}/>
       <Stack.Screen options={{ ...defautOptions, title: '好友列表' }}    name='FriendsList'        component={FriendsList}/>
-      <Stack.Screen options={{ ...defautOptions, title: '' }}    name='LocalTickets'       component={LocalTickets}/>
+      <Stack.Screen options={{ ...defautOptions, title: '票种' }}    name='LocalTickets'       component={LocalTickets}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='ModifyTicket'       component={ModifyTicket}/>
       <Stack.Screen options={{ ...defautOptions, title: '用户信息' }}    name='StrangerInfo'       component={StrangerInfo}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='PublishTrend'       component={PublishTrend}/>
@@ -106,7 +106,7 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '活动列表' }}    name='ActivityList'       component={ActivityList}/>
       <Stack.Screen options={{ ...defautOptions, title: '关系链' }}    name='RelationChain'      component={RelationChain}/>
       <Stack.Screen options={{ ...defautOptions, title: '动态详情' }}    name='DynamicDetail'      component={DynamicDetail}/>
-      <Stack.Screen options={{ ...defautOptions, title: '' }}    name='LocalAddTicket'     component={LocalAddTicket}/>
+      <Stack.Screen options={{ ...defautOptions, title: '新增票种' }}    name='LocalAddTicket'     component={LocalAddTicket}/>
       <Stack.Screen options={{ ...defautOptions, title: '活动详情' }}    name='ActivityDetail'     component={ActivityDetail}/>
       <Stack.Screen options={{ ...defautOptions, title: '互动通知' }}    name='InteractiveList'    component={InteractiveList}/>
       <Stack.Screen options={{ ...defautOptions, title: '活动列表' }}    name='ActivityMsgList'    component={ActivityMsgList}/>

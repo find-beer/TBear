@@ -61,7 +61,6 @@ export default class LocalAddTicket extends React.Component {
     return (
       <Fragment>
         <SafeAreaView style={{ backgroundColor: 'white' }} />
-        <Header {...this.props} title={'新增票种'} />
         <View style={{ flex: 1 }}>
           <SettingItem
             title={'票种名称'}
