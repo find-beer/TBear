@@ -20,6 +20,8 @@ target 'TBear' do
 
   # pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
 
+  pod 'RealmJS', :path => '../node_modules/realm'
+
   target 'TBearTests' do
     inherit! :complete
     # Pods for testing

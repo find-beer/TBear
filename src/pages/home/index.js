@@ -45,12 +45,14 @@ class Home extends React.Component {
     }
   }
   componentDidMount() {
+   
     removeStorage('messages')
     this.props.setModalLoading(false)
     this.initUserInfo()
   }
   initUserInfo = async () => {
     const userInfo = await getStorage('userInfo')
+    console.log('userInfo=================>', userInfo)
     if (userInfo.uid) {
       this.props.setUserInfo(userInfo)
       // 初始化SDK

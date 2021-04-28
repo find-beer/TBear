@@ -5,6 +5,7 @@ import {Switch} from '@ant-design/react-native';
 import { removeStorage } from '../../../utils/storage'
 import { scaleSize, scaleFont } from '../../../utils/scaleUtil'
 import { connect, bindActions, bindState }  from '../../../redux'
+import * as nim from '../../../utils/nim'
 
 class Setting extends Component {
     state = {
@@ -34,9 +35,14 @@ class Setting extends Component {
 
     logout = async () => {
         await removeStorage('userInfo')
-        await removeStorage('messages')
+        await removeStorage('friendSysMsgsData')
+        console.log('nim======================',nim)
+        if(nim.instance !== undefined) {
+          nim.instance.disconnect();
+        }
         this.props.setUserInfo({})
         this.props.navigation.navigate('Home')
+        
     }
 
     render (){

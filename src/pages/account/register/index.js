@@ -30,6 +30,7 @@ import SelectType from './../../../components/selectType'
 import moment from 'moment'
 import { setStorage } from './../../../utils/storage'
 import { ScrollView } from 'react-native-gesture-handler';
+import * as nim from '../../../utils/nim'
 
 const isiPhone = Platform.OS === 'ios'
 const genderOptions = [
@@ -193,6 +194,7 @@ class Register extends Component{
         Toast.toast('注册成功', () => {
           this.props.setUserInfo(data)
           setStorage('userInfo', data)
+          nim.initNIM();
           this.props.navigation.navigate('Home')
         })
       } else {

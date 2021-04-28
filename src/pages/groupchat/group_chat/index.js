@@ -1,4 +1,4 @@
-import { View, Image, StyleSheet } from 'react-native'
+import { View, Image, StyleSheet, DeviceEventEmitter } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import React from 'react'
 import {
@@ -9,6 +9,7 @@ import {
   Actions,
   renderActions,
 } from 'react-native-gifted-chat'
+import Header from '../../../components/header/index'
 import { screenW } from '../../../constants'
 import { scaleSize, scaleFont } from '../../../utils/scaleUtil'
 import { connect, bindActions, bindState } from '../../../redux'
@@ -23,16 +24,37 @@ class GroupChat extends React.Component {
     super(props)
     console.log(
       'GroupChat=============================>',
-      props.route.params.groupId
+      props.route.params.activeId
     )
     this.state = {
-      groupId: props.route.params.groupId, //群Id
+      id: props.route.params.activeId, //活动Id
       messages: [],
       userInfo: this.props.userInfo,
+      activityData: {},
+    }
+  }
+
+  requireActivityData = async () => {
+    const { id } = this.state
+
+    const { success, data } = await this.props.get('activity/activity/detail', {
+      id,
+    })
+    console.log('requireActivityData=============> ', data)
+    if (success) {
+      this.setState({ activityData: data }, () => {
+        console.log('data', this.state.activityData)
+      })
     }
   }
 
   componentDidMount() {
+    this.event = DeviceEventEmitter.addListener('fetchOnTeams', (teams) => {
+      // 注册通知
+      console.log('teams=======================>', teams)
+    })
+    // 获取活动详情
+    this.requireActivityData()
     if (!this.state.messages.length) {
       this.setState({
         messages: [
@@ -132,6 +154,15 @@ class GroupChat extends React.Component {
     })
   }
 
+  componentWillUnmount() {
+    this.event.remove()
+  }
+  onRightClick = () => {
+    console.log('拉人入群')
+    const { activityTitle, payGroupId, groupId } = this.state.activityData
+    const { navigation } = this.props
+    navigation.navigate('ChatSetting', { teamId: payGroupId })
+  }
   onSend(messages = []) {
     this.setState((previousState) => ({
       messages: GiftedChat.append(previousState.messages, messages),
@@ -140,6 +171,8 @@ class GroupChat extends React.Component {
 
   render() {
     const { messages } = this.state
+    const { activityTitle, payGroupId, groupId } = this.state.activityData
+    console.log('render================>', this.state.activityData)
 
     const list = [
       {
@@ -161,6 +194,13 @@ class GroupChat extends React.Component {
     ]
     return (
       <>
+        <Header
+          {...this.props}
+          noLeft
+          title={activityTitle}
+          right={'。。。'}
+          onRightClick={this.onRightClick}
+        />
         {this.state.messages.length === 0 && (
           <View
             style={[

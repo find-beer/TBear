@@ -63,6 +63,8 @@ import LocalModifyTicket from "./pages/home/local_modify_ticket";
 
 import Chatting from "./pages/chat/Chatting"
 import GroupChat from "./pages/groupchat/group_chat"
+import ChatSetting from "./pages/groupchat/chat_setting"
+import CheckedFriends from "./pages/groupchat/friend_list"
 /**
  * App主堆栈
  */
@@ -114,6 +116,8 @@ const MainStack = () => {
       <Stack.Screen options={{ ...defautOptions, title: '单聊' }}    name='Chatting'  component={Chatting}/>
       <Stack.Screen options={{ ...defautOptions, title: '' }}    name='SettingP2p'  component={SettingP2p}/>
       <Stack.Screen options={{ ...defautOptions, title: '群聊' }}    name='GroupChat'  component={GroupChat}/>
+      <Stack.Screen options={{ ...defautOptions, title: '' }}    name='ChatSetting'  component={ChatSetting}/>
+      <Stack.Screen options={{ ...defautOptions, title: '' }}    name='CheckedFriends'  component={CheckedFriends}/>
     </Stack.Navigator>
   )
 }

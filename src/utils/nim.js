@@ -1,7 +1,11 @@
 const SDK = require('../../nim/NIM_Web_SDK_rn_v7.2.0.js')
-import { getStorage } from './storage'
 import { DeviceEventEmitter } from 'react-native'
-
+import { setStorage, getStorage, removeStorage } from '../utils/storage'
+const Realm = require('realm')
+// 此处将外置的realm数据库挂载到sdk上，供sdk使用
+SDK.usePlugin({
+  db: Realm,
+})
 let instance
 let data = {}
 // 初始化sdk
@@ -14,9 +18,9 @@ const initNIM = async (account, token) => {
     instance = SDK.NIM.getInstance({
       debug: true,
       appKey: '67b35e65c41efd1097ef8504d5a88455',
-      token,
       account: accid,
-      db: false, // 使用数据库
+      token,
+      db: true, // 使用数据库
       onconnect: onConnect,
       onwillreconnect: onWillReconnect,
       ondisconnect: onDisconnect,
@@ -30,7 +34,12 @@ const initNIM = async (account, token) => {
       onsysmsg: onSysMsg,
       onupdatesysmsg: onUpdateSysMsg,
       onsysmsgunread: onSysMsgUnread,
-      onupdatesysmsgunread:onUpdateSysMsgUnread,
+      onupdatesysmsgunread: onUpdateSysMsgUnread,
+      onteams: onTeams,
+      onsynccreateteam: onCreateTeam,
+      onteammembers: onTeamMembers,
+      //onsyncteammembersdone: onSyncTeamMembersDone,
+      onupdateteammember: onUpdateTeamMember,
     })
   }
   console.log('db============================', instance.support.db)
@@ -65,10 +74,12 @@ onOfflineMsgs = (options) => {
 
 onMsg = (msg) => {
   pushMsg(msg)
-  console.log('onMsg=========================', msg)
   console.log('收到消息', msg.scene, msg.type, msg)
-   //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
-   DeviceEventEmitter.emit('fetchMessages', msg)
+  var sessionId = msg.scene + '-' + msg.from
+  var msgObj = {}
+  msgObj[sessionId] = msg
+  //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
+  DeviceEventEmitter.emit('fetchMessages', msgObj)
 }
 
 const sendMsgDone = (error, msg) => {
@@ -102,23 +113,37 @@ const pushMsg = (msgs) => {
   var sessionId = msgs[0].scene + '-' + msgs[0].to
   data.msgs = data.msgs || {}
   data.msgs[sessionId] = instance.mergeMsgs(data.msgs[sessionId], msgs)
+  // console.log('data.msgs[sessionId]==============',data)
+  // DeviceEventEmitter.emit('fetchMessages', data)
 }
 
 const nimDB = data
 
-
 // 加好友
-const onOfflineSysMsgs = (sysMsgs) => {
+onOfflineSysMsgs = (sysMsgs) => {
   console.log('收到离线系统通知', sysMsgs)
   pushSysMsgs(sysMsgs)
 }
-const onSysMsg = (sysMsg) => {
+onSysMsg = (sysMsg) => {
   console.log('收到系统通知', sysMsg)
   pushSysMsgs(sysMsg)
-   //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
-   DeviceEventEmitter.emit('fetchSysMsg', sysMsg)
+  //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
+
+  DeviceEventEmitter.emit('fetchSysMsg', sysMsg)
+  // 入群邀请
+  // let teamsList = []
+  // if (sysMsg.type === 'teamInvite') {
+  //   teamsList.push(sysMsg)
+  //   const oldTeams = []
+  //   oldTeams = (await getStorage('teams')) || []
+
+  //   console.log('oldTeams=================', oldTeams)
+  //   console.log('oldTeams=================', teamsList)
+
+  //   setStorage('teams', [...teamsList, ...oldTeams])
+  // }
 }
-const onUpdateSysMsg = (sysMsg) => {
+onUpdateSysMsg = (sysMsg) => {
   pushSysMsgs(sysMsg)
 }
 
@@ -126,27 +151,27 @@ pushSysMsgs = (sysMsgs) => {
   data.sysMsgs = instance.mergeSysMsgs(data.sysMsgs, sysMsgs)
 }
 
-const onSysMsgUnread = (obj) => {
+onSysMsgUnread = (obj) => {
   console.log('收到系统通知未读数', obj)
   data.sysMsgUnread = obj
   refreshSysMsgsUI()
 }
-const onUpdateSysMsgUnread = (obj) => {
+onUpdateSysMsgUnread = (obj) => {
   console.log('系统通知未读数更新了', obj)
   data.sysMsgUnread = obj
   refreshSysMsgsUI()
 }
-const refreshSysMsgsUI = () => {
+refreshSysMsgsUI = () => {
   // 刷新界面
 }
-const onFriends = (friends) => {
+onFriends = (friends) => {
   console.log('收到好友列表', friends)
   data.friends = instance.mergeFriends(data.friends, friends)
   data.friends = instance.cutFriends(data.friends, friends.invalid)
   refreshFriendsUI()
 }
 
-const onSyncFriendAction = (obj) => {
+onSyncFriendAction = (obj) => {
   console.log(obj)
   switch (obj.type) {
     case 'addFriend':
@@ -182,25 +207,79 @@ const onSyncFriendAction = (obj) => {
   }
 }
 
-const onAddFriend = (friend) => {
+onAddFriend = (friend) => {
   data.friends = instance.mergeFriends(data.friends, friend)
   serverAddFriend()
   refreshFriendsUI()
 }
 
-const onDeleteFriend = (account) => {
+onDeleteFriend = (account) => {
   data.friends = instance.cutFriendsByAccounts(data.friends, account)
   refreshFriendsUI()
 }
 
-const onUpdateFriend = (friend) => {
+onUpdateFriend = (friend) => {
   data.friends = instance.mergeFriends(data.friends, friend)
   refreshFriendsUI()
 }
 
-const refreshFriendsUI = () => {
+refreshFriendsUI = () => {
   // 刷新界面
 }
 
 // 群聊
+onTeams = (teams) => {
+  console.log('收到群列表', teams)
+  data.teams = instance.mergeTeams(data.teams, teams)
+  onInvalidTeams(teams.invalid)
+  //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
+  DeviceEventEmitter.emit('fetchOnTeams', teams)
+}
+onInvalidTeams = (teams) => {
+  console.log('收到群邀请列表', teams)
+  data.teams = instance.cutTeams(data.teams, teams)
+  data.invalidTeams = instance.mergeTeams(data.invalidTeams, teams)
+  refreshTeamsUI()
+}
+onCreateTeam = (team) => {
+  console.log('你创建了一个群', team)
+  data.teams = instance.mergeTeams(data.teams, team)
+  refreshTeamsUI()
+  onTeamMembers({
+    teamId: team.teamId,
+    members: owner,
+  })
+}
+refreshTeamsUI = () => {
+  // 刷新界面
+}
+onTeamMembers = (obj) => {
+  console.log('群id', teamId, '群成员', members)
+  var teamId = obj.teamId
+  var members = obj.members
+  data.teamMembers = data.teamMembers || {}
+  data.teamMembers[teamId] = instance.mergeTeamMembers(
+    data.teamMembers[teamId],
+    members
+  )
+  data.teamMembers[teamId] = instance.cutTeamMembers(
+    data.teamMembers[teamId],
+    members.invalid
+  )
+  refreshTeamMembersUI()
+}
+// function onSyncTeamMembersDone() {
+//     console.log('同步群成员列表完成');
+// }
+onUpdateTeamMember = (teamMember) => {
+  console.log('群成员信息更新了', teamMember)
+  onTeamMembers({
+    teamId: teamMember.teamId,
+    members: teamMember,
+  })
+}
+refreshTeamMembersUI = () => {
+  // 刷新界面
+}
+
 export { initNIM, sendMessage, nimDB, instance }

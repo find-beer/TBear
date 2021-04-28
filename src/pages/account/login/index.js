@@ -21,6 +21,7 @@ import { setStorage } from './../../../utils/storage'
 import * as Toast from './../../../utils/toast'
 import AsyncStorage from '@react-native-community/async-storage'
 import { bindActions, bindState, connect } from './../../../redux'
+import * as nim from '../../../utils/nim'
 
 class Login extends Component {
   constructor(props) {
@@ -133,6 +134,7 @@ class Login extends Component {
         setStorage('userInfo', data)
         this.props.setUserInfo(data)
         AsyncStorage.setItem('session', data.token)
+        nim.initNIM();
         this.props.navigation.goBack()
       } else {
         if (code === 10001) {

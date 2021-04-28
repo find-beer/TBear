@@ -19,7 +19,7 @@ const defaultAvatar =
 export default class DynamicItem extends Component {
   constructor(props) {
     super(props)
-    console.log('relations',props)
+    // console.log('relations',props)
     this.state = {
       feed: { ...props.feed },
       visible: false,
@@ -83,7 +83,7 @@ export default class DynamicItem extends Component {
   render() {
     const { visible, currentIndex } = this.state
     // 上传的图片和视频
-    console.log('关系网', this.state)
+    // console.log('关系网', this.state)
     const feed = this.state.feed
     const picList = feed.picUrl ? feed.picUrl.split(',') : []
     const videoList = feed.videoUrl ? feed.videoUrl.split(',') : []

@@ -48,10 +48,9 @@ class ActivityDetail extends React.Component {
     const { success, data } = await this.props.get('activity/activity/detail', {
       id,
     })
-    console.log('data ------> ', data)
     if (success) {
       this.setState({ data }, () => {
-        console.log('data', this.state.data)
+        console.log('requireDeviceData', this.state.data)
       })
     }
   }
@@ -62,7 +61,7 @@ class ActivityDetail extends React.Component {
 
   joinTalk = () => {
     const { navigation } = this.props
-    navigation.navigate('GroupChat',{groupId:this.state.data.groupId})
+    navigation.navigate('GroupChat',{activeId:this.state.data.id})
   }
 
   confirmParticipate = () => {}
@@ -88,7 +87,6 @@ class ActivityDetail extends React.Component {
   }
 
   render() {
-    console.log('this.state', this.state.data)
     const {
       activityTitle,
       activityTime,

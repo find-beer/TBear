@@ -25,7 +25,6 @@ import { connect, bindActions, bindState } from './../../redux'
 import { GetRequest } from '../../utils/request'
 import { getDayTime } from '../../utils/date'
 import { scaleSize, scaleFont } from '../../utils/scaleUtil'
-import { setStorage, getStorage, removeStorage } from '../../utils/storage'
 const SDK = require('../../../nim/NIM_Web_SDK_rn_v7.2.0.js')
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import Item from '@ant-design/react-native/lib/list/ListItem'
@@ -60,27 +59,35 @@ class Chatting extends React.Component {
   }
 
   componentDidMount() {
-    console.log('instance================>', nim.instance)
+    console.log('SDK.NIM==================>', SDK.NIM)
+    console.log('nim.instance==================>', nim.instance)
+    // console.log('instance================>', nim.instance)
     this.fetchFrinedInfo()
     this.fetchMessages()
-    this.event = DeviceEventEmitter.addListener('fetchMessages', (msg) => {
-      //注册通知
-      console.log('DeviceEventEmitter==========================', msg)
-      // 接收信息
-      const { uid, name, headPicUrl } = this.state.frinedInfo
-      let acceptMessage = []
-      acceptMessage.push({
-        createdAt: getDayTime(msg.time),
-        text: msg.text,
-        user: {
-          _id: uid,
-          name: name,
-          avatar: headPicUrl,
-        },
-        _id: Math.round(Math.random() * 1000000),
-      })
-      // 更新UI信息
-      this.handleUpdateMessages(acceptMessage)
+    this.event = DeviceEventEmitter.addListener('fetchMessages', (msgObj) => {
+      console.log('DeviceEventEmitter==========================', msgObj)
+      if (msgObj) {
+        const key = 'p2p' + '-' + this.state.friendUid
+        const msg = msgObj[key]
+        //注册通知
+        if (msg === undefined) return
+        // console.log('DeviceEventEmitter==========================', msg)
+        // 接收信息
+        const { uid, name, headPicUrl } = this.state.frinedInfo
+        let acceptMessage = []
+        acceptMessage.push({
+          createdAt: getDayTime(msg.time),
+          text: msg.text,
+          user: {
+            _id: uid,
+            name: name,
+            avatar: headPicUrl,
+          },
+          _id: Math.round(Math.random() * 1000000),
+        })
+        // 更新UI信息
+        this.handleUpdateMessages(acceptMessage)
+      }
     })
 
     //   if (!this.state.messages.length) {
@@ -112,7 +119,7 @@ class Chatting extends React.Component {
   }
   componentWillUnmount() {
     // 移除通知
-    this.event.remove()
+    // this.event.remove()
   }
   // 获取好友信息
   fetchFrinedInfo = () => {
@@ -125,7 +132,7 @@ class Chatting extends React.Component {
           frinedInfo: res.data,
         },
         () => {
-          // console.log('frinedInfo', this.state.frinedInfo)
+          console.log('frinedInfo', this.state.frinedInfo)
         }
       )
     })
@@ -134,16 +141,45 @@ class Chatting extends React.Component {
   // 获取漫游信息
   fetchMessages() {
     const roamingMsgs = nim.nimDB.msgs
-    let messagesTypes = {}
-    if (roamingMsgs !== null || roamingMsgs !== undefined) {
-      messagesTypes = Object.values(roamingMsgs)
+    console.log('roamingMsgs==========================>', roamingMsgs)
+    // let keys = Object.keys(roamingMsgs)
+    // keysList = []
+    // keys.forEach(item => {
+    //   keysList.push(item.substring(4))
+    // })
+
+    // 1)对方的account
+    const friendKey = 'p2p' + '-' + this.state.friendUid
+    // console.log('====================================key', key)
+    // console.log('====================================roamingMsgs[key]', roamingMsgs[key])
+    let friendMessages = roamingMsgs[friendKey]
+
+    // console.log('friendMessages==========================>', friendMessages)
+
+    // 2）自己的account
+    const selfKey = 'p2p' + '-' + this.state.userInfo.uid
+    let selfMessages = roamingMsgs[selfKey]
+
+    if (friendMessages === undefined) {
+      friendMessages = []
+    }
+    if (selfMessages === undefined) {
+      selfMessages = []
     }
 
+    // console.log('selfMessages==========================>', selfMessages)
+    const messages = [...friendMessages, ...selfMessages]
+
+    // let messagesTypes = {}
+    // if (roamingMsgs !== null || roamingMsgs !== undefined) {
+    //   messagesTypes = Object.values(roamingMsgs)
+    // }
+
     // 1) 合并数组
-    let messages = []
-    for (var i = 0; i < messagesTypes.length; i++) {
-      messages.push(...messagesTypes[i])
-    }
+    // let messages = []
+    // for (var i = 0; i < messagesTypes.length; i++) {
+    //   messages.push(...messagesTypes[i])
+    // }
 
     // 2）时间排序
     messages.sort((a, b) => {
