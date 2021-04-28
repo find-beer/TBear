@@ -25,7 +25,7 @@ export default class CheckedFriends extends React.Component {
       friendList: [],
       friendsLength: 0,
       teamId: props.route.params.teamId,
-      uids:null,
+      uids: null,
     }
   }
 
@@ -73,30 +73,34 @@ export default class CheckedFriends extends React.Component {
     })
     this.setState({
       friendsLength: newFriendList.length,
-      uids:uids,
+      uids: uids,
     })
   }
 
-
   addFriends() {
-    const { friendList,teamId,uids } = this.state
+    const { friendList, teamId, uids } = this.state
     console.log('addFriends')
     if (friendList.findIndex((target) => target.select === true) == -1) {
       Alert.alert('请勾选要邀请的好友')
       return
     }
 
-  // 拉好友进群
+    // 拉好友进群
     nim.instance.addTeamMembers({
       teamId: teamId,
       accounts: uids,
       ps: '加入我们的群吧',
       custom: '',
-      done: (error, obj) =>{
-        console.log(error);
-        console.log(obj);
-        console.log('入群邀请发送' + (!error?'成功':'失败'));
-      }
+      done: (error, obj) => {
+        console.log(error)
+        console.log(obj)
+        console.log('入群邀请发送' + (!error ? '成功' : '失败'))
+        if (!error) {
+          Alert.alert('入群邀请发送成功')
+        } else {
+          Alert.alert('入群邀请发送失败')
+        }
+      },
     })
   }
 

@@ -184,6 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: scaleSize(12),
     backgroundColor: '#f2f2f2',
     paddingHorizontal: scaleSize(50),
+    
   },
   operate_item: {
     paddingHorizontal: scaleSize(50),

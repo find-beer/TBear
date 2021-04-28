@@ -1,11 +1,11 @@
 const SDK = require('../../nim/NIM_Web_SDK_rn_v7.2.0.js')
 import { DeviceEventEmitter } from 'react-native'
 import { setStorage, getStorage, removeStorage } from '../utils/storage'
-const Realm = require('realm')
+// const Realm = require('realm')
 // 此处将外置的realm数据库挂载到sdk上，供sdk使用
-SDK.usePlugin({
-  db: Realm,
-})
+// SDK.usePlugin({
+//   db: Realm,
+// })
 let instance
 let data = {}
 // 初始化sdk

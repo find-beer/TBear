@@ -188,31 +188,47 @@ class StrangerInfo extends Component {
               {this.state.uid !== this.props.userInfo.uid && (
                 <View style={styles.operateBox}>
                   {this.state.personalInfo.userType === 0 && (
-                    <View style={styles.chatBox}>
+                    <View>
                       {this.state.personalInfo.friend === true ||
                       this.props.userInfo.province ===
                         this.state.personalInfo.province ? (
                         // 1）普通用户 2）是好友或者同城
-                        <TouchableOpacity onPress={this.handleChat}>
-                          <View style={styles.centerStyle}>
-                            <Image
-                              style={styles.operateIcon}
-                              source={imageUrl.relative}
-                            />
-                            <Text style={styles.operateText}>聊天</Text>
-                          </View>
-                        </TouchableOpacity>
+                        <View style={styles.relativeBox2}>
+                          <TouchableOpacity
+                            onPress={this.handleChat}
+                            style={styles.chatFollowBox}
+                          >
+                            <View style={styles.centerStyle2}>
+                              <Image
+                                style={styles.operateIcon}
+                                source={imageUrl.relative}
+                              />
+                              <Text style={styles.operateText}>聊天</Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
                       ) : (
                         // 1）普通用户 2）不是好友或者同城
-                        <TouchableOpacity onPress={this.handleAddFtiend}>
-                          <View style={styles.centerStyle}>
-                            <Image
-                              style={styles.operateIcon}
-                              source={imageUrl.addFriend}
-                            />
-                            <Text style={styles.operateText}>添加好友</Text>
-                          </View>
-                        </TouchableOpacity>
+                        <View style={styles.relativeBox2}>
+                          <TouchableOpacity onPress={this.handleAddFtiend}>
+                            <View style={styles.centerStyle2}>
+                              <Image
+                                style={styles.operateIcon}
+                                source={imageUrl.addFriend}
+                              />
+                              <Text style={styles.operateText}>添加好友</Text>
+                            </View>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={this.handleChat}>
+                            <View style={styles.centerStyle2}>
+                              <Image
+                                style={styles.operateIcon}
+                                source={imageUrl.relative}
+                              />
+                              <Text style={styles.operateText}>聊天</Text>
+                            </View>
+                          </TouchableOpacity>
+                        </View>
                       )}
                     </View>
                   )}
@@ -393,7 +409,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    width: '80%',
+    width: '95%',
   },
   chatFollowBox: {
     display: 'flex',
