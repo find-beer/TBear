@@ -45,10 +45,10 @@ class Home extends React.Component {
     }
   }
   componentDidMount() {
-   
     removeStorage('messages')
     this.props.setModalLoading(false)
     this.initUserInfo()
+    
   }
   initUserInfo = async () => {
     const userInfo = await getStorage('userInfo')

@@ -215,6 +215,7 @@ dependencies {
 //    implementation project(path:':react-native-imui')
     implementation('com.amap.api:location:5.2.0')
     implementation 'org.codehaus.groovy:groovy-all:2.4.12'
+    implementation project(':realm')
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group: 'com.facebook.fbjni'

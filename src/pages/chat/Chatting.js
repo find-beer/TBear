@@ -33,6 +33,8 @@ import AsyncStorage from '@react-native-community/async-storage'
 import RNFS from 'react-native-fs'
 import * as nim from '../../utils/nim'
 import { result } from 'lodash'
+
+const Realm = require('realm')
 const data = {}
 
 const images = {
@@ -50,6 +52,7 @@ class Chatting extends React.Component {
     this.state = {
       userInfo: this.props.userInfo,
       messages: [],
+      historyMessages: [],
       frinedInfo: {}, // 好友的信息
       friendUid: this.props.route.params.uid,
       isLoadingEarlier: false,
@@ -59,19 +62,18 @@ class Chatting extends React.Component {
   }
 
   componentDidMount() {
-    console.log('SDK.NIM==================>', SDK.NIM)
-    console.log('nim.instance==================>', nim.instance)
-    // console.log('instance================>', nim.instance)
+    // console.log('Realm.defaultPath==============================>',Realm.defaultPath)
+    // console.log('SDK.NIM==================>', SDK.NIM)
+    // console.log('nim.instance==================>', nim.instance)
     this.fetchFrinedInfo()
     this.fetchMessages()
     this.event = DeviceEventEmitter.addListener('fetchMessages', (msgObj) => {
-      console.log('DeviceEventEmitter==========================', msgObj)
+      // console.log('DeviceEventEmitter==========================', msgObj)
       if (msgObj) {
         const key = 'p2p' + '-' + this.state.friendUid
         const msg = msgObj[key]
         //注册通知
         if (msg === undefined) return
-        // console.log('DeviceEventEmitter==========================', msg)
         // 接收信息
         const { uid, name, headPicUrl } = this.state.frinedInfo
         let acceptMessage = []
@@ -119,7 +121,7 @@ class Chatting extends React.Component {
   }
   componentWillUnmount() {
     // 移除通知
-    // this.event.remove()
+    this.event.remove()
   }
   // 获取好友信息
   fetchFrinedInfo = () => {
@@ -138,49 +140,39 @@ class Chatting extends React.Component {
     })
   }
 
-  // 获取漫游信息
-  fetchMessages() {
-    const roamingMsgs = nim.nimDB.msgs
-    console.log('roamingMsgs==========================>', roamingMsgs)
-    // let keys = Object.keys(roamingMsgs)
-    // keysList = []
-    // keys.forEach(item => {
-    //   keysList.push(item.substring(4))
-    // })
-
+  // 获取历史记录信息
+  fetchMessages = () => {
     // 1)对方的account
-    const friendKey = 'p2p' + '-' + this.state.friendUid
-    // console.log('====================================key', key)
-    // console.log('====================================roamingMsgs[key]', roamingMsgs[key])
-    let friendMessages = roamingMsgs[friendKey]
-
-    // console.log('friendMessages==========================>', friendMessages)
+    this.fetchHistoryMessages(this.state.friendUid)
 
     // 2）自己的account
-    const selfKey = 'p2p' + '-' + this.state.userInfo.uid
-    let selfMessages = roamingMsgs[selfKey]
+    this.fetchHistoryMessages(this.state.userInfo.uid)
+  }
 
-    if (friendMessages === undefined) {
-      friendMessages = []
+  fetchHistoryMessages = (account) => {
+    nim.instance.getHistoryMsgs({
+      scene: 'p2p',
+      to: account,
+      done: this.getHistoryMessages,
+    })
+  }
+
+  getHistoryMessages = (error, obj) => {
+    console.log('获取p2p历史消息' + (!error ? '成功' : '失败'))
+    console.log(error)
+    console.log(obj)
+    if (!error) {
+      this.setState(
+        {
+          historyMessages: [...this.state.historyMessages, ...obj.msgs],
+        },
+        () => {
+          this.fixData(this.state.historyMessages)
+        }
+      )
     }
-    if (selfMessages === undefined) {
-      selfMessages = []
-    }
-
-    // console.log('selfMessages==========================>', selfMessages)
-    const messages = [...friendMessages, ...selfMessages]
-
-    // let messagesTypes = {}
-    // if (roamingMsgs !== null || roamingMsgs !== undefined) {
-    //   messagesTypes = Object.values(roamingMsgs)
-    // }
-
-    // 1) 合并数组
-    // let messages = []
-    // for (var i = 0; i < messagesTypes.length; i++) {
-    //   messages.push(...messagesTypes[i])
-    // }
-
+  }
+  fixData(messages) {
     // 2）时间排序
     messages.sort((a, b) => {
       return b.time < a.time ? 1 : -1
@@ -240,7 +232,7 @@ class Chatting extends React.Component {
   onSend = (newMessages = []) => {
     console.log('newMessages', newMessages)
     // 发送nim信息
-    nim.sendMessage(this.state.frinedInfo.uid, newMessages[0].text)
+    nim.sendMessage('p2p', this.state.frinedInfo.uid, newMessages[0].text)
     // 发送UI信息
     const { name, headPicUrl, uid } = this.state.userInfo
     let sendMessage = []
@@ -278,16 +270,18 @@ class Chatting extends React.Component {
 
     // 发送图片NIM
     var blob = SDK.NIM.blob.fromDataURL(dataURL)
-    const fastPassParams = {
-      w: data.width,
-      h: data.height,
-      // md5: md5,
-    }
-    console.log('==================', JSON.stringify(fastPassParams))
+    // const fastPassParams = {
+    //   w: data.width,
+    //   h: data.height,
+    //   // md5: md5,
+    // }
+    // console.log('==================', JSON.stringify(fastPassParams))
+    console.log('blob============================', blob)
     nim.instance.previewFile({
       type: 'image',
       blob: blob,
-      fastPass: JSON.stringify(fastPassParams),
+      commonUpload: true,
+      // fastPass: JSON.stringify(fastPassParams),
       uploadprogress: (obj) => {
         console.log('文件总大小: ' + obj.total + 'bytes')
         console.log('已经上传的大小: ' + obj.loaded + 'bytes')
@@ -300,6 +294,7 @@ class Chatting extends React.Component {
         // show file to the user
         if (!error) {
           var msg = nim.instance.sendFile({
+            type: 'image',
             scene: 'p2p',
             to: this.state.frinedInfo.uid,
             file: file,
@@ -453,7 +448,7 @@ class Chatting extends React.Component {
     ImagePicker.showImagePicker(options, (response) => {
       console.log('Response', response)
       if (response.data) {
-        // this.onSendByType(response)
+        this.onSendByType(response)
       }
     })
   }

@@ -1,11 +1,22 @@
 const SDK = require('../../nim/NIM_Web_SDK_rn_v7.2.0.js')
 import { DeviceEventEmitter } from 'react-native'
 import { setStorage, getStorage, removeStorage } from '../utils/storage'
-// const Realm = require('realm')
+import * as realm from '../utils/realm'
+// 本地数据库
+const Realm = require('realm')
 // 此处将外置的realm数据库挂载到sdk上，供sdk使用
-// SDK.usePlugin({
-//   db: Realm,
-// })
+SDK.usePlugin({
+  db: Realm,
+})
+
+// 本地日志
+// const RNFS = require('react-native-fs')
+// const params = {
+//   rnfs: RNFS,
+// }
+// params.rnfs.size = 1024 * 1024 // 日志文件体积上限，单位:bytes; 选填，默认为1M
+// SDK.usePlugin(params)
+
 let instance
 let data = {}
 // 初始化sdk
@@ -75,11 +86,21 @@ onOfflineMsgs = (options) => {
 onMsg = (msg) => {
   pushMsg(msg)
   console.log('收到消息', msg.scene, msg.type, msg)
-  var sessionId = msg.scene + '-' + msg.from
-  var msgObj = {}
-  msgObj[sessionId] = msg
-  //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
-  DeviceEventEmitter.emit('fetchMessages', msgObj)
+
+  if (msg.scene === 'p2p') {
+    var sessionId = msg.scene + '-' + msg.from
+    var msgObj = {}
+    msgObj[sessionId] = msg
+    //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
+    DeviceEventEmitter.emit('fetchMessages', msgObj)
+  }
+  if (msg.scene === 'team') {
+    var sessionId = msg.scene + '-' + msg.to
+    var msgObj = {}
+    msgObj[sessionId] = msg
+    //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
+    DeviceEventEmitter.emit('fetchTeamMessages', msgObj)
+  }
 }
 
 const sendMsgDone = (error, msg) => {
@@ -96,10 +117,10 @@ const sendMsgDone = (error, msg) => {
   pushMsg(msg)
 }
 
-const sendMessage = (account, text) => {
+const sendMessage = (scene, account, text) => {
   console.log('instance', instance)
   var msg = instance.sendText({
-    scene: 'p2p',
+    scene: scene,
     to: account,
     text: text,
     done: sendMsgDone,
@@ -131,17 +152,17 @@ onSysMsg = (sysMsg) => {
 
   DeviceEventEmitter.emit('fetchSysMsg', sysMsg)
   // 入群邀请
-  // let teamsList = []
-  // if (sysMsg.type === 'teamInvite') {
-  //   teamsList.push(sysMsg)
-  //   const oldTeams = []
-  //   oldTeams = (await getStorage('teams')) || []
-
-  //   console.log('oldTeams=================', oldTeams)
-  //   console.log('oldTeams=================', teamsList)
-
-  //   setStorage('teams', [...teamsList, ...oldTeams])
-  // }
+  if (sysMsg.type === 'teamInvite') {
+    // 3)增加
+    let id = Math.round(Math.random() * 1000000)
+    let TeamInviteNotify = JSON.stringify(sysMsg)
+    realm.TeamInviteRealm.write(() => {
+      realm.TeamInviteRealm.create('TeamInvite2', {
+        id: id,
+        TeamInviteNotify: TeamInviteNotify,
+      })
+    })
+  }
 }
 onUpdateSysMsg = (sysMsg) => {
   pushSysMsgs(sysMsg)
