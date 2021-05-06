@@ -20,6 +20,7 @@ import { connect, bindActions, bindState } from '../../../redux'
 import { setStorage, getStorage, removeStorage } from '../../../utils/storage'
 import * as nim from '../../../utils/nim'
 const SDK = require('../../../../nim/NIM_Web_SDK_rn_v7.2.0')
+import * as realm from '../../../utils/realm'
 var data = {}
 class DigFriends extends React.Component {
   constructor(props) {
@@ -43,6 +44,7 @@ class DigFriends extends React.Component {
       //   },
       // ],
       friendSysMsgsList: [],
+      applyFriendLists: [],
     }
   }
   componentDidMount() {
@@ -50,12 +52,24 @@ class DigFriends extends React.Component {
     // this.initNotify()
     // this.fetchPersonInfo()
     // removeStorage('friendSysMsgsData')
-    this.event = DeviceEventEmitter.addListener('fetchSysMsg', (sysMsg) => {})
+    // this.event = DeviceEventEmitter.addListener('fetchSysMsg', (sysMsg) => {})
+    // this.fetchApplyFriend()
   }
   componentWillUnmount() {
-    this.event.remove()
+    // this.event.remove()
   }
 
+  fetchApplyFriend = () => {
+    let applyFriendData = realm.TeamInviteRealm.objects('ApplyFriend')
+    let applyFriendList = []
+    applyFriendData.forEach((element, index) => {
+      applyFriendList.push(element)
+    })
+    console.log('applyFriendList=================>', applyFriendList)
+    this.setState({
+      applyFriendLists: applyFriendList,
+    })
+  }
   fetchPersonInfo = () => {
     getStorage('friendSysMsgsData').then((applyString) => {
       if (applyString) {
@@ -111,7 +125,7 @@ class DigFriends extends React.Component {
     if (this.state.searchResult.uid) {
       nim.instance.applyFriend({
         account: this.state.searchResult.uid,
-        ps: 'ps',
+        ps: '申请加为好友',
         done: (error, obj) => {
           console.log(error)
           console.log(obj)

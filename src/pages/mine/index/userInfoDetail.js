@@ -24,6 +24,7 @@ import { scaleSize, scaleFont } from '../../../utils/scaleUtil'
 export default class UserInfoDetail extends React.Component {
   constructor(props) {
     super(props)
+    console.log('userInfoDetails=========', props)
   }
 
   render() {

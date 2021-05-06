@@ -52,6 +52,24 @@ export default class InteractiveList extends React.Component {
   }
 
   fetchTeamInvite = () => {
+    realm.TeamInviteRealm.write(() => {
+      let TeamInvites = realm.TeamInviteRealm.objects('TeamInvite2')
+      // realm.TeamInviteRealm.delete(TeamInvites)
+      let TeamInviteList = []
+      TeamInvites.forEach((element, index) => {
+        TeamInviteList.push({
+          id: element.id,
+          TeamInviteNotify: JSON.parse(element.TeamInviteNotify),
+        })
+      })
+      console.log('TeamInviteList=================>', TeamInviteList)
+      this.setState({
+        TeamList: TeamInviteList,
+      })
+    })
+  }
+
+  fetchTeams = () => {
     let TeamInvites = realm.TeamInviteRealm.objects('TeamInvite2')
     let TeamInviteList = []
     TeamInvites.forEach((element, index) => {
@@ -60,7 +78,7 @@ export default class InteractiveList extends React.Component {
         TeamInviteNotify: JSON.parse(element.TeamInviteNotify),
       })
     })
-    console.log('TeamInviteList=================>', TeamInviteList)
+    console.log('TeamInviteList2=================>', TeamInviteList)
     this.setState({
       TeamList: TeamInviteList,
     })
@@ -135,24 +153,23 @@ export default class InteractiveList extends React.Component {
         console.log(obj)
         console.log('拒绝入群邀请' + (!error ? '成功' : '失败'))
 
-        if (!error0) {
+        if (!error) {
           Alert.alert('拒绝入群邀请成功')
         } else {
           Alert.alert('拒绝入群邀请失败')
         }
 
-        // 操作成功后删除这一项
-        realm.TeamInviteRealm.write(() => {
-          realm.TeamInviteRealm.create('TeamInvite2', { id: TeamItem.id }, true)
-          realm.TeamInviteRealm.delete(team)
-        })
+        this.handleDelete(TeamItem.id)
       },
     })
   }
   // 同意邀请入群
   handlePass(TeamItem) {
     console.log('handlePass======================', TeamItem)
-    const { idServer, to, from } = TeamItem.TeamInviteNotify
+    const { idServer, to, from, attach } = TeamItem.TeamInviteNotify
+    const { navigation } = this.props
+    // navigation.navigate('GroupChat', { teamId: attach.team.teamId })
+
     nim.instance.acceptTeamInvite({
       idServer: 3858486957,
       teamId: to,
@@ -161,19 +178,27 @@ export default class InteractiveList extends React.Component {
         console.log(error)
         console.log(obj)
         console.log('接受入群邀请' + (!error ? '成功' : '失败'))
-        if (!error0) {
+        if (!error) {
           Alert.alert('接受入群邀请成功')
+          navigation.navigate('GroupChat', { teamId: attach.team.teamId })
         } else {
           Alert.alert('接受入群邀请失败')
         }
 
-        // 操作成功后删除这一项
-        realm.TeamInviteRealm.write(() => {
-          console.log(111111111111111111)
-          realm.TeamInviteRealm.create('TeamInvite2', { id: TeamItem.id }, true)
-          realm.TeamInviteRealm.delete(team)
-        })
+        this.handleDelete(TeamItem.id)
       },
+    })
+  }
+  handleDelete = (teamId) => {
+    // 操作成功后删除这一项
+    realm.TeamInviteRealm.write(() => {
+      let team = realm.TeamInviteRealm.create(
+        'TeamInvite2',
+        { id: teamId },
+        true
+      )
+      realm.TeamInviteRealm.delete(team)
+      this.fetchTeams()
     })
   }
   render() {

@@ -75,14 +75,9 @@ class StrangerInfo extends Component {
       userId: Number(this.props.route.params.uid),
     }).then((res) => {
       // console.log('personalInfo', res) //true
-      this.setState(
-        {
-          personalInfo: res.data,
-        },
-        () => {
-          console.log('personalInfo', this.state.personalInfo)
-        }
-      )
+      this.setState({
+        personalInfo: res.data,
+      })
     })
   }
   handleAddFtiend = () => {

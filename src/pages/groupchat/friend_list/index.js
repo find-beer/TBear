@@ -131,7 +131,7 @@ export default class CheckedFriends extends React.Component {
           }}
           style={styles.footer}
         >
-          <Text style={styles.footerText}>确认（{friendsLength}）</Text>
+          <Text style={styles.footerText}>确定（{friendsLength}）</Text>
         </TouchableOpacity>
       </View>
     )

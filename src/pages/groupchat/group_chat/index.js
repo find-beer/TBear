@@ -15,6 +15,7 @@ import { scaleSize, scaleFont } from '../../../utils/scaleUtil'
 import { connect, bindActions, bindState } from '../../../redux'
 import * as nim from '../../../utils/nim'
 import { getDayTime } from '../../../utils/date'
+import * as realm from '../../../utils/realm'
 const images = {
   uploadpictures: require('../../../assets/chat/uploadpictures.png'),
   sendvoice: require('../../../assets/chat/sendvoice.png'),
@@ -29,8 +30,10 @@ class GroupChat extends React.Component {
       props.route.params.activeId
     )
     console.log('this.props.userInfo===================', this.props.userInfo)
+    console.log('props.route.params.teamId', props.route.params.teamId)
     this.state = {
       id: props.route.params.activeId, //活动Id
+      teamId: props.route.params.teamId, //团队Id
       messages: [],
       userInfo: this.props.userInfo,
       activityData: {},
@@ -40,16 +43,50 @@ class GroupChat extends React.Component {
 
   requireActivityData = async () => {
     const { id } = this.state
-
-    const { success, data } = await this.props.get('activity/activity/detail', {
-      id,
-    })
-    console.log('requireActivityData=============> ', data)
-    if (success) {
-      this.setState({ activityData: data }, () => {
-        console.log('data', this.state.activityData)
-        // 获取历史记录
-        this.fetchHistoryMessages(this.state.activityData.payGroupId)
+    if (id !== undefined) {
+      const { success, data } = await this.props.get(
+        'activity/activity/detail',
+        {
+          id,
+        }
+      )
+      console.log('requireActivityData=============> ', data)
+      if (success) {
+        this.setState({ activityData: data }, () => {
+          console.log('data', this.state.activityData)
+          // 获取历史记录
+          this.fetchHistoryMessages(this.state.activityData.payGroupId)
+        })
+      }
+    } else {
+      realm.TeamInviteRealm.write(() => {
+        let TeamInvites = realm.TeamInviteRealm.objects('TeamInvite2')
+        let TeamInviteList = []
+        TeamInvites.forEach((element, index) => {
+          TeamInviteList.push({
+            id: element.id,
+            TeamInviteNotify: JSON.parse(element.TeamInviteNotify),
+          })
+        })
+        let TeamObj = {}
+        console.log('TeamInviteList=================>', TeamInviteList)
+        TeamInviteList.forEach((item) => {
+          if (item.TeamInviteNotify.attach.team.teamId === this.state.teamId) {
+            TeamObj.activityTitle = item.TeamInviteNotify.attach.team.name
+            TeamObj.payGroupId = Number(
+              item.TeamInviteNotify.attach.team.teamId
+            )
+          }
+        })
+        this.setState(
+          {
+            activityData: TeamObj,
+          },
+          () => {
+            console.log('activityData ============>', this.state.activityData)
+            this.fetchHistoryMessages(this.state.activityData.payGroupId)
+          }
+        )
       })
     }
   }
@@ -58,31 +95,33 @@ class GroupChat extends React.Component {
     // 获取活动详情
     this.requireActivityData()
 
-    this.event = DeviceEventEmitter.addListener('fetchTeamMessages', (msgObj) => {
-      console.log('DeviceEventEmitter==========================', msgObj)
-      if (msgObj) {
-        const key = 'team' + '-' + this.state.activityData.payGroupId
-        const msg = msgObj[key]
-        //注册通知
-        if (msg === undefined) return
-        // 接收信息
-        // const { uid, name, headPicUrl } = this.state.frinedInfo
-        let acceptMessage = []
-        acceptMessage.push({
-          createdAt: getDayTime(msg.time),
-          text: msg.text,
-          user: {
-            _id: msg.from,
-            name: msg.fromNick,
-            // avatar: headPicUrl,
-          },
-          _id: Math.round(Math.random() * 1000000),
-        })
-        // 更新UI信息
-        this.handleUpdateMessages(acceptMessage)
+    this.event = DeviceEventEmitter.addListener(
+      'fetchTeamMessages',
+      (msgObj) => {
+        console.log('DeviceEventEmitter==========================', msgObj)
+        if (msgObj) {
+          const key = 'team' + '-' + this.state.activityData.payGroupId
+          const msg = msgObj[key]
+          //注册通知
+          if (msg === undefined) return
+          // 接收信息
+          // const { uid, name, headPicUrl } = this.state.frinedInfo
+          let acceptMessage = []
+          acceptMessage.push({
+            createdAt: getDayTime(msg.time),
+            text: msg.text,
+            user: {
+              _id: msg.from,
+              name: msg.fromNick,
+              // avatar: headPicUrl,
+            },
+            _id: Math.round(Math.random() * 1000000),
+          })
+          // 更新UI信息
+          this.handleUpdateMessages(acceptMessage)
+        }
       }
-    })
-
+    )
   }
 
   fetchHistoryMessages = (account) => {
@@ -104,6 +143,7 @@ class GroupChat extends React.Component {
           teamsMessages: obj.msgs,
         },
         () => {
+          console.log('this.state.teamsMessages', this.state.teamsMessages)
           this.fixData(this.state.teamsMessages)
         }
       )

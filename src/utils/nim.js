@@ -145,21 +145,33 @@ onOfflineSysMsgs = (sysMsgs) => {
   console.log('收到离线系统通知', sysMsgs)
   pushSysMsgs(sysMsgs)
 }
-onSysMsg = (sysMsg) => {
+onSysMsg = async (sysMsg) => {
   console.log('收到系统通知', sysMsg)
   pushSysMsgs(sysMsg)
   //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
 
-  DeviceEventEmitter.emit('fetchSysMsg', sysMsg)
+  // DeviceEventEmitter.emit('fetchSysMsg', sysMsg)
   // 入群邀请
   if (sysMsg.type === 'teamInvite') {
     // 3)增加
+    // const userInfo = await getStorage('userInfo')
+    // const { uid } = userInfo
     let id = Math.round(Math.random() * 1000000)
     let TeamInviteNotify = JSON.stringify(sysMsg)
     realm.TeamInviteRealm.write(() => {
       realm.TeamInviteRealm.create('TeamInvite2', {
         id: id,
         TeamInviteNotify: TeamInviteNotify,
+      })
+    })
+  }
+  // 申请加好友
+  if (sysMsg.type === 'applyFriend') {
+    let id = Math.round(Math.random() * 1000000)
+    realm.TeamInviteRealm.write(() => {
+      realm.TeamInviteRealm.create('ApplyFriend', {
+        id: id,
+        ...sysMsg,
       })
     })
   }

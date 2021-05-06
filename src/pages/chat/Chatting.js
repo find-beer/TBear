@@ -62,7 +62,7 @@ class Chatting extends React.Component {
   }
 
   componentDidMount() {
-    // console.log('Realm.defaultPath==============================>',Realm.defaultPath)
+    console.log('Realm.defaultPath==============================>',Realm.defaultPath)
     // console.log('SDK.NIM==================>', SDK.NIM)
     // console.log('nim.instance==================>', nim.instance)
     this.fetchFrinedInfo()
