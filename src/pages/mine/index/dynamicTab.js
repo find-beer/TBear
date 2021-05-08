@@ -25,7 +25,7 @@ export default class DynamicTab extends Component {
     }
   }
   componentDidMount() {
-    EventBus.on('REFRESHLIST',() => {
+    EventBus.on('REFRESHLIST', () => {
       requestCurrent()
     })
   }
@@ -71,6 +71,7 @@ export default class DynamicTab extends Component {
     //有uid
     this.state.uid ? this.requestStranger() : this.requestCurrent()
     EventBus.on('REFRESH_TREND', () => {
+      console.log('触发EventBus222=============》')
       this.state.uid ? this.requestStranger() : this.requestCurrent()
     })
     AsyncStorage.getItem('userInfo', (error, result) => {

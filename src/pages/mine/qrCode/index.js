@@ -112,7 +112,12 @@ class QrCode extends Component {
             <View style={styles.qrCodeWrapper}>
               <ImageBackground source={imgUrl.qrCodeBg} style={styles.qrBg}>
                 {/* <Image source={imgUrl.avatar} style={styles.avatar}></Image> */}
-                <Image source={{ uri: userInfo.headPicUrl?.replace("https", "http") }} style={styles.avatar}></Image>
+                <Image
+                  source={{
+                    uri: userInfo.headPicUrl?.replace('https', 'http'),
+                  }}
+                  style={styles.avatar}
+                ></Image>
                 <Text style={styles.userName}>{userInfo.name}</Text>
                 <View style={styles.codeContainer}>
                   {/* <QRCode
@@ -121,7 +126,7 @@ class QrCode extends Component {
                     bgColor='black'
                     fgColor='white'/> */}
                   <QRCode
-                    value={''+ userInfo.uid}
+                    value={'' + userInfo.uid}
                     size={scaleSize(520)}
                     color="black"
                     backgroundColor="white"

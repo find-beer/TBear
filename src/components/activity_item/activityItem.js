@@ -11,6 +11,7 @@ const imageUrl = { relation: require("../../assets/home/relationline.png") };
 const defaultAvatr = 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1817066819,1530157012&fm=11&gp=0.jpg'
 class ActivityItem extends Component {
   constructor(props) {
+    console.log('ActivityItem===============',props)
     super(props);
     this.state = {
       userId: props.userInfo.uid,

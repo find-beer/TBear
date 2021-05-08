@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react'
-import { StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native'
+import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native'
 const imageUrl = {
   like: require('../../../assets/home/like.png'),
   unlike: require('../../../assets/home/unlike.png'),
@@ -17,13 +17,13 @@ import Button from './../../../components/button'
 import Video from 'react-native-video'
 import { screenW } from '../../../constants'
 import ImageViewer from 'react-native-image-viewing'
-import EventBus from '../../../utils/EventBus';
+import EventBus from '../../../utils/EventBus'
 const defaultAvatar =
   'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1817066819,1530157012&fm=11&gp=0.jpg'
 class FeedItem extends Component {
   constructor(props) {
     super(props)
-    // console.log('this.props ----> ', this.props)
+    console.log('this.propsFeedItem ----> ', this.props)
     this.state = {
       data: props.data,
       loginUid: this.props.loginUid || '',
@@ -39,7 +39,7 @@ class FeedItem extends Component {
   handleGoStrangerPage() {
     const { userVO } = this.state.data
     if (userVO && userVO.userId) {
-      this.props.navigation.navigate('StrangerInfo', { uid:userVO.userId })
+      this.props.navigation.navigate('StrangerInfo', { uid: userVO.userId })
     }
   }
   handleGoVideoplay(item) {
@@ -86,7 +86,6 @@ class FeedItem extends Component {
     } catch (e) {
       Toast.fail('删除失败，请重试')
     }
-    
   }
   render() {
     const { visible, currentIndex } = this.state
@@ -103,6 +102,8 @@ class FeedItem extends Component {
     const videoList = videoUrl ? videoUrl.split(',') : []
     // 头像显示
     const pic = userVO && userVO.pic ? userVO.pic : defaultAvatar
+    // 用户名
+    const userName = userVO && userVO.userName ? userVO.userName : null
     // 图片预览
     const viewImages = []
     picList.map((item, index) => {
@@ -120,7 +121,7 @@ class FeedItem extends Component {
               />
             </TouchableOpacity>
             <View style={styles.dynamicInfo}>
-              <Text style={styles.name}> </Text>
+              <Text style={styles.name}>{userName} </Text>
               <View style={styles.infoBox}>
                 <Text style={styles.infoTime}>{getDate(data.publishTime)}</Text>
               </View>

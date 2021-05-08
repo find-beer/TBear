@@ -7,6 +7,7 @@ import { getDate } from '../../utils/date'
 
 import ImageViewer from 'react-native-image-viewing'
 import Video from 'react-native-video'
+import { connect, bindActions, bindState } from '../../redux'
 const imageUrl = {
   like: require('../../assets/home/like.png'),
   unlike: require('../../assets/home/unlike.png'),
@@ -16,10 +17,10 @@ const imageUrl = {
 }
 const defaultAvatar =
   'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1817066819,1530157012&fm=11&gp=0.jpg'
-export default class DynamicItem extends Component {
+class DynamicItem extends Component {
   constructor(props) {
     super(props)
-    // console.log('relations',props)
+    console.log('DynamicItem===================', props)
     this.state = {
       feed: { ...props.feed },
       visible: false,
@@ -204,7 +205,7 @@ export default class DynamicItem extends Component {
     )
   }
 }
-
+export default connect(bindState, bindActions)(DynamicItem)
 const styles = StyleSheet.create({
   dynamicItemWrap: {
     backgroundColor: '#fff',

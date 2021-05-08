@@ -25,7 +25,6 @@ var data = {}
 class DigFriends extends React.Component {
   constructor(props) {
     super(props)
-    console.log('DigFriends==============props', props)
     this.state = {
       searchString: '',
       searchResult: {},
@@ -45,62 +44,54 @@ class DigFriends extends React.Component {
       // ],
       friendSysMsgsList: [],
       applyFriendLists: [],
+      applyList: [],
     }
   }
   componentDidMount() {
-    // console.log('addFriendInstance', utils)
-    // this.initNotify()
-    // this.fetchPersonInfo()
-    // removeStorage('friendSysMsgsData')
-    // this.event = DeviceEventEmitter.addListener('fetchSysMsg', (sysMsg) => {})
-    // this.fetchApplyFriend()
+    this.fetchPersonInfo()
+    this.event = DeviceEventEmitter.addListener('fetchSysMsg', (sysMsg) => {
+      this.setState({
+        applyList: [...this.state.applyList, sysMsg],
+      })
+      this.handleFix(this.state.applyList)
+    })
   }
   componentWillUnmount() {
-    // this.event.remove()
+    this.event.remove()
   }
 
-  fetchApplyFriend = () => {
-    let applyFriendData = realm.TeamInviteRealm.objects('ApplyFriend')
+  handleFix = (applyList) => {
     let applyFriendList = []
-    applyFriendData.forEach((element, index) => {
-      applyFriendList.push(element)
-    })
-    console.log('applyFriendList=================>', applyFriendList)
-    this.setState({
-      applyFriendLists: applyFriendList,
+    applyList.forEach((applyItem) => {
+      let applyFriendObj = {}
+      GetRequest('user/userInfo', {
+        userId: Number(applyItem.from),
+      }).then((res) => {
+        if (res.code === 0) {
+          applyFriendObj.name = res.data.name
+          applyFriendObj.headPicUrl = res.data.headPicUrl
+          applyFriendObj.ps = applyItem.ps
+          applyFriendObj.idServer = applyItem.idServer
+          applyFriendObj.account = Number(applyItem.from)
+          applyFriendObj.state = applyItem.state
+          applyFriendList.push(applyFriendObj)
+        }
+        this.setState(
+          {
+            friendSysMsgsList: applyFriendList,
+          },
+        )
+      })
     })
   }
   fetchPersonInfo = () => {
     getStorage('friendSysMsgsData').then((applyString) => {
       if (applyString) {
         const applyList = eval(applyString)
-        let applyFriendList = []
-
         // 申请好友列表
-        applyList.forEach((applyItem) => {
-          let applyFriendObj = {}
-          GetRequest('user/userInfo', {
-            userId: Number(applyItem.from),
-          }).then((res) => {
-            if (res.code === 0) {
-              applyFriendObj.name = res.data.name
-              applyFriendObj.headPicUrl = res.data.headPicUrl
-              applyFriendObj.ps = applyItem.ps
-              applyFriendObj.idServer = applyItem.idServer
-              applyFriendObj.account = Number(applyItem.from)
-              applyFriendObj.state = applyItem.state
-              console.log('applyFriendObj', applyFriendObj)
-              applyFriendList.push(applyFriendObj)
-            }
-            this.setState(
-              {
-                friendSysMsgsList: applyFriendList,
-              },
-              () => {
-                console.log('friendSysMsgsList', this.state.friendSysMsgsList)
-              }
-            )
-          })
+        this.handleFix(applyList)
+        this.setState({
+          applyList: applyList,
         })
       }
     })
@@ -143,7 +134,6 @@ class DigFriends extends React.Component {
   serverAddFriend = () => {
     GetRequest(`/userRelation/addFriend/${this.state.searchString}`).then(
       (res) => {
-        console.log('result', res)
         if (res.code === 0) {
           Toast.success(res.msg || '添加成功')
           Alert.alert('添加成功')
@@ -154,132 +144,11 @@ class DigFriends extends React.Component {
       }
     )
   }
-  initNotify = () => {
-    const { iminfo } = this.props.userInfo
-    const { accid, token } = iminfo
-    // utils.initIM(accid, token)
-    this.instance = SDK.NIM.getInstance({
-      debug: true,
-      appKey: '67b35e65c41efd1097ef8504d5a88455',
-      token,
-      account: accid,
-      db: false, // 不使用数据库
-      onfriends: this.onFriends,
-      onsyncfriendaction: this.onSyncFriendAction,
-      onofflinesysmsgs: this.onOfflineSysMsgs,
-      onsysmsg: this.onSysMsg,
-      onupdatesysmsg: this.onUpdateSysMsg,
-      onsysmsgunread: this.onSysMsgUnread,
-      onupdatesysmsgunread: this.onUpdateSysMsgUnread,
-    })
-  }
-
-  onOfflineSysMsgs = (sysMsgs) => {
-    console.log('收到离线系统通知', sysMsgs)
-    this.pushSysMsgs(sysMsgs)
-  }
-  onSysMsg = (sysMsg) => {
-    console.log('收到系统通知', sysMsg)
-    this.pushSysMsgs(sysMsg)
-  }
-  onUpdateSysMsg = (sysMsg) => {
-    this.pushSysMsgs(sysMsg)
-  }
-  pushSysMsgs = (sysMsgs) => {
-    data.sysMsgs = this.instance.mergeSysMsgs(data.sysMsgs, sysMsgs)
-
-    getStorage('friendSysMsgsData').then((applyString) => {
-      if (applyString) {
-        const applyList = eval(applyString)
-        let applyNewList = [sysMsgs, ...applyList]
-        let applyNewListString = JSON.stringify(applyNewList)
-        setStorage('friendSysMsgsData', applyNewListString)
-        this.refreshSysMsgsUI()
-      } else {
-        setStorage('friendSysMsgsData', JSON.stringify(data.sysMsgs))
-      }
-    })
-  }
-  onSysMsgUnread = (obj) => {
-    console.log('收到系统通知未读数', obj)
-    data.sysMsgUnread = obj
-    this.refreshSysMsgsUI()
-  }
-  onUpdateSysMsgUnread = (obj) => {
-    console.log('系统通知未读数更新了', obj)
-    data.sysMsgUnread = obj
-    this.refreshSysMsgsUI()
-  }
-  refreshSysMsgsUI = () => {
-    // 刷新界面
-  }
-  onFriends = (friends) => {
-    console.log('收到好友列表', friends)
-    data.friends = this.instance.mergeFriends(data.friends, friends)
-    data.friends = this.instance.cutFriends(data.friends, friends.invalid)
-    this.refreshFriendsUI()
-  }
-
-  onSyncFriendAction = (obj) => {
-    console.log(obj)
-    switch (obj.type) {
-      case 'addFriend':
-        console.log(
-          '你在其它端直接加了一个好友' + obj.account + ', 附言' + obj.ps
-        )
-        this.onAddFriend(obj.friend)
-        break
-      case 'applyFriend':
-        console.log(
-          '你在其它端申请加了一个好友' + obj.account + ', 附言' + obj.ps
-        )
-        break
-      case 'passFriendApply':
-        console.log(
-          '你在其它端通过了一个好友申请' + obj.account + ', 附言' + obj.ps
-        )
-        this.onAddFriend(obj.friend)
-        break
-      case 'rejectFriendApply':
-        console.log(
-          '你在其它端拒绝了一个好友申请' + obj.account + ', 附言' + obj.ps
-        )
-        break
-      case 'deleteFriend':
-        console.log('你在其它端删了一个好友' + obj.account)
-        this.onDeleteFriend(obj.account)
-        break
-      case 'updateFriend':
-        console.log('你在其它端更新了一个好友', obj.friend)
-        this.onUpdateFriend(obj.friend)
-        break
-    }
-  }
-
-  onAddFriend = (friend) => {
-    data.friends = nim.instance.mergeFriends(data.friends, friend)
-    this.serverAddFriend()
-    this.refreshFriendsUI()
-  }
-
-  onDeleteFriend = (account) => {
-    data.friends = this.instance.cutFriendsByAccounts(data.friends, account)
-    this.refreshFriendsUI()
-  }
-
-  onUpdateFriend = (friend) => {
-    data.friends = this.instance.mergeFriends(data.friends, friend)
-    this.refreshFriendsUI()
-  }
-
-  refreshFriendsUI = () => {
-    // 刷新界面
-  }
 
   // 拒绝
   handleRefuse(info) {
     console.log('handleRefuse', info)
-    this.instance.rejectFriendApply({
+    nim.instance.rejectFriendApply({
       idServer: info.idServer,
       account: info.account,
       ps: 'ps',
@@ -298,7 +167,7 @@ class DigFriends extends React.Component {
   // 通过
   handlePass(info) {
     // console.log('handlePass', info)
-    this.instance.passFriendApply({
+    nim.instance.passFriendApply({
       idServer: info.idServer,
       account: info.account,
       ps: 'ps',

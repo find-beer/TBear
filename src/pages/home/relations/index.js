@@ -25,11 +25,12 @@ import {
 import ActivityItem from '../../../components/activity_item/activityItem'
 import DynamicItem from '../../../components/dynamic_item/dynamicItem'
 import { bindActions, bindState, connect } from '../../../redux'
+import EventBus from '../../../utils/EventBus'
 const { width, height } = Dimensions.get('window')
+import { GetRequest } from '../../../utils/request'
 const emptyHeight = height - 200
 class Relations extends React.Component {
   constructor(props) {
-    console.log('relations', props)
     super(props)
     this.state = {
       relationDetailList: [],
@@ -50,6 +51,10 @@ class Relations extends React.Component {
 
   componentDidMount() {
     this.getData()
+    // EventBus.on('REFRESH_TREND', () => {
+    //   console.log('出发EventBus111=============》')
+    //   this.getData()
+    // })
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -57,6 +62,10 @@ class Relations extends React.Component {
     if (userInfo !== this.props.userInfo && this.props.userInfo.uid) {
       this.getData()
     }
+    // const { relationDetailList } = prevState
+    // if (relationDetailList !== this.state.relationDetailList) {
+    //   this.getData()
+    // }
   }
   onBtnClick = (activity) => {
     const { navigation } = this.props
@@ -74,7 +83,7 @@ class Relations extends React.Component {
         <ActivityItem
           {...this.props}
           activity={activity}
-          userId={this.state.userId}
+          userId={this.state.userInfo.userId}
           onBtnClick={() => this.onBtnClick(activity)}
         />
       )
@@ -106,12 +115,42 @@ class Relations extends React.Component {
           {
             relationDetailList: data.relationDetailList,
           },
+          () => {
+            console.log(
+              'relationDetailList============',
+              this.state.relationDetailList
+            )
+          }
         )
       }
     } catch (e) {
       console.log('error', e)
     }
   }
+  
+  // getData = () => {
+  //   const payload = {
+  //     limit: 500,
+  //     feedOffsetId: 0,
+  //     activityOffsetId: 0,
+  //   }
+  //   GetRequest('user/relationfeed', payload).then((res) => {
+  //     console.log('res',res)
+  //     if (res.success) {
+  //       this.setState(
+  //         {
+  //           relationDetailList: res.data.relationDetailList,
+  //         },
+  //         () => {
+  //           console.log(
+  //             'relationDetailList============',
+  //             this.state.relationDetailList
+  //           )
+  //         }
+  //       )
+  //     }
+  //   })
+  // }
 
   renderEmpty = () => {
     return (
@@ -123,7 +162,6 @@ class Relations extends React.Component {
 
   render() {
     const { relationDetailList, isRefreshing, userInfo } = this.state
-    console.log('this.state', this.state)
     return (
       <View style={styles.container}>
         <FlatList

@@ -150,7 +150,6 @@ onSysMsg = async (sysMsg) => {
   pushSysMsgs(sysMsg)
   //发送通知 第一个参数是通知名称，后面的参数是发送的值可以多个
 
-  // DeviceEventEmitter.emit('fetchSysMsg', sysMsg)
   // 入群邀请
   if (sysMsg.type === 'teamInvite') {
     // 3)增加
@@ -167,12 +166,21 @@ onSysMsg = async (sysMsg) => {
   }
   // 申请加好友
   if (sysMsg.type === 'applyFriend') {
-    let id = Math.round(Math.random() * 1000000)
-    realm.TeamInviteRealm.write(() => {
-      realm.TeamInviteRealm.create('ApplyFriend', {
-        id: id,
-        ...sysMsg,
-      })
+    // 监听
+    DeviceEventEmitter.emit('fetchSysMsg', sysMsg)
+    // 将数据保存到storage中
+    getStorage('friendSysMsgsData').then((applyString) => {
+      if (applyString) {
+        const applyList = eval(applyString)
+        let applyNewList = [sysMsg, ...applyList]
+        let applyNewListString = JSON.stringify(applyNewList)
+        setStorage('friendSysMsgsData', applyNewListString)
+        this.refreshSysMsgsUI()
+      } else {
+        let sysMsgList = []
+        sysMsgList.push(sysMsg)
+        setStorage('friendSysMsgsData', JSON.stringify(sysMsgList))
+      }
     })
   }
 }
